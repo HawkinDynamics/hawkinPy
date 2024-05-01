@@ -5,7 +5,8 @@ name: Python Package Push and Test
 
 on:
   push:
-    branches: [ "dev_env" ]
+    branches:
+      - dev_env
     paths:
       - 'hdforce/**'
       - 'tests/**'
