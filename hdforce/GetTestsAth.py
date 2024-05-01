@@ -3,6 +3,8 @@ import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
 from .utils import responseHandler, logger, ConfigManager
 from .AuthManager import AuthManager
 
@@ -10,7 +12,7 @@ from .AuthManager import AuthManager
 #--------------------#
 ## Tests by Athlete
 def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
-    """Fetches and returns test trials for a specified athlete from an API. The function allows filtering of results based on time frames and the state of the test (active or not).
+    """Get test trials for a specified athlete from an API. The function allows filtering of results based on time frames and the state of the test (active or not).
 
     Parameters
     ----------
@@ -32,7 +34,7 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing test trials matching the query criteria, with the following DataFrame attirbutes:
+        A DataFrame containing test trials matching the query criteria, with the following DataFrame attributes:
         - Athlete Id
         - Athlete Name
         - Last Sync Time
@@ -62,7 +64,7 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
         raise Exception(f"No Access Token found. Run authManager to gain access.")
     elif int(nowtime) >= tokenExp:
         logger.debug("::GetTestsAth:: ACCESS_TOKEN expired.")
-        # autheniticate
+        # authenticate
         try:
             AuthManager(
                 region= ConfigManager.region,
@@ -75,7 +77,7 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
             a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
             logger.debug("::GetTestsAth - Validate:: ACCESS_TOKEN retrieved")
             tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-            logger.debug("::GetTestsAth - Validat:: TOKEN_EXPIRATION retrieved")
+            logger.debug("::GetTestsAth - Validate:: TOKEN_EXPIRATION retrieved")
             if a_token is None:
                 logger.error("::GetTestsAth - Validate:: No ACCESS_TOKEN found.")
                 raise Exception(f"No Access Token found. Run authManager to gain access.")
@@ -141,7 +143,7 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
             df = df[df['active'] == True]
 
         # Athlete Real Name
-        aName = df['athlete.name'].unique()
+        aName = df['athlete_name'].unique()
         aName = str(aName[0])
 
         # Setting attributes

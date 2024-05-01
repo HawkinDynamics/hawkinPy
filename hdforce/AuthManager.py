@@ -1,9 +1,12 @@
 from dotenv import load_dotenv, set_key
-from .utils import TokenManager, varsManager, logger, ConfigManager
+# Package imports
+import logging
+from .LogConfig import LoggerConfig
+from .utils import TokenManager, varsManager, ConfigManager
 
 #--------------------#
 # Authenticator
-def AuthManager(region: str = "Americas", authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TOKEN", refreshToken: str = None, env_file_name: str = None, ) -> None:
+def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TOKEN", refreshToken: str = None, env_file_name: str = None, region: str = "Americas") -> None:
     """ Choose the authentication settings
     
     Parameters
@@ -12,7 +15,7 @@ def AuthManager(region: str = "Americas", authMethod: str = "env", refreshToken_
         The region that designates the url prefix.
 
     authMethod : str required
-        Determine method of storing authenitcation variables, including refresh token. One of 'env', 'file', 'manual'. env = use of system environment. file = use of .env file. manual = no stored refresh token. 
+        Determine method of storing authentication variables, including refresh token. One of 'env', 'file', 'manual'. env = use of system environment. file = use of .env file. manual = no stored refresh token. 
     
     refreshToken_name : str
         Specific name of refresh token variable saved in system environment or .env file
@@ -32,6 +35,12 @@ def AuthManager(region: str = "Americas", authMethod: str = "env", refreshToken_
         If authMethod='manual' and no refreshToken provided
     
     """
+    # Check if logging has been configured, if not, set up default logging
+    if not LoggerConfig.configured:
+        LoggerConfig.setup_logger()  # Using default parameters
+    # Initialize logging
+    logger = logging.getLogger('hdforce')
+
     # auth method options
     methods = ['env', 'file', 'manual']
 

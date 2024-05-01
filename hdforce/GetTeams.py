@@ -1,15 +1,17 @@
 # Dependencies -----
-from .utils import logger, ConfigManager
-from .AuthManager import AuthManager
 import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
+from .utils import logger, ConfigManager
+from .AuthManager import AuthManager
 
 #--------------------#
 ## Get Teams -----
 def GetTeams() -> pd.DataFrame:
-    """Fetches and returns team names and IDs from an API. This function is designed to retrieve all teams within your organization.
+    """Get teams for an account. This function is designed to retrieve all teams within your organization.
 
     Returns
     -------

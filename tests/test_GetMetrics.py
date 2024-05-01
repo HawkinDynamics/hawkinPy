@@ -7,7 +7,7 @@ import pandas as pd
 def test_GetMetrics_success():
     
     # Authenticate
-    AuthManager(authMethod = 'file', env_file_name = '.env')
+    AuthManager(authMethod= "file", env_file_name= "tests\.env")
 
     # Call for metrics
     metrics = GetMetrics()

@@ -3,13 +3,15 @@ import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
 from .utils import responseHandler, logger, ConfigManager
 from .AuthManager import AuthManager
 
 #--------------------#    
 ## Tests by Group
 def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
-    """Fetches and returns test trials for specified group(s) from an API. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
+    """Get test trials for specified team(s). Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
 
     Parameters
     ----------
@@ -60,7 +62,7 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
         raise Exception(f"No Access Token found. Run authManager to gain access.")
     elif int(nowtime) >= tokenExp:
         logger.debug("::GetTestsGroup:: ACCESS_TOKEN expired.")
-        # autheniticate
+        # authenticate
         try:
             AuthManager(
                 region= ConfigManager.region,
@@ -73,7 +75,7 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
             a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
             logger.debug("::GetTestsGroup - Validate:: ACCESS_TOKEN retrieved")
             tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-            logger.debug("::GetTestsGroup - Validat:: TOKEN_EXPIRATION retrieved")
+            logger.debug("::GetTestsGroup - Validate:: TOKEN_EXPIRATION retrieved")
             if a_token is None:
                 logger.error("::GetTestsGroup - Validate:: No ACCESS_TOKEN found.")
                 raise Exception(f"No Access Token found. Run authManager to gain access.")

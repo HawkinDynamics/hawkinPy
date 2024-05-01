@@ -1,35 +1,20 @@
 #import pandas as pd
+import pandas as pd
 from pandas import json_normalize
 import requests
 import datetime
 import logging
 import os
 from dotenv import load_dotenv, set_key
+from .LogConfig import LoggerConfig
 
-
-#--------------------#
-# Logger
-# Create a logger
+# Check if logging has been configured, if not, set up default logging
+if not LoggerConfig.configured:
+    LoggerConfig.setup_logger()  # Using default parameters
+# Initialize logging
 logger = logging.getLogger('hdforce')
-logger.setLevel(logging.DEBUG)  # Set minimum level of logs to capture
-
-# Create file handler which logs even debug messages
-fh = logging.FileHandler('hdforce.log')
-fh.setLevel(logging.DEBUG)
-
-# Create console handler with a higher log level
-ch = logging.StreamHandler()
-ch.setLevel(logging.WARNING)
-
-# Create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
-
-# Add the handlers to the logger
-logger.addHandler(fh)
-logger.addHandler(ch)
-
+# Initialize logging
+logger = logging.getLogger('hdforce')
 
 #--------------------#
 # Configuration Manager
@@ -174,12 +159,12 @@ class TokenManager:
         response = requests.get(url_token, headers=headers)
 
         # Handle request response
-        if response.status_code == 200:  # successfull
+        if response.status_code == 200:  # successful
             token_response = response.json()
             self.accessToken = token_response['access_token']
             self.ExpirationStr = datetime.datetime.fromtimestamp(token_response['expires_at'])
             self.ExpirationVal = int(token_response['expires_at'])
-            logger.debug(f"::TokenManaer:: Access token retrieved successfully")
+            logger.debug(f"::TokenManager:: Access token retrieved successfully")
         else:  # error
             error_msg = {
                 401: "Error 401: Refresh Token is invalid or expired.",
@@ -207,13 +192,75 @@ def responseHandler(json_data):
         arranged according to a custom-defined order.
 
     """
-    # Normalize the 'athlete' data from each entry in 'data'
-    df = json_normalize(json_data['data'], errors='ignore')
+    # 1 - Create normalized DataFrame
+    dfAll = json_normalize(json_data['data'], errors='ignore')
 
-    # List all columns from the DataFrame
+    # 2 - Remove athlete and testType columns
+    # 2.1 - Generate a list of columns to drop
+    columns_to_drop = [col for col in dfAll.columns if col.startswith('testType') or col.startswith('athlete')]
+
+    # 2.2 - Drop the columns from the DataFrame
+    dfAll.drop(columns=columns_to_drop, inplace=True)
+
+    # 3.1 - Create DataFrame of athlete and testType info
+    infoDF = pd.json_normalize(
+        json_data['data'],
+        meta=[
+            'id',
+            ['athlete', 'id'],
+            ['athlete', 'name'],
+            ['athlete', 'teams'],
+            ['athlete', 'groups'],
+            ['athlete', 'active'],
+            ['testType', 'id'],
+            ['testType', 'name'],
+            ['testType', 'canonicalId']
+        ], errors='ignore'
+    )
+
+    # Check for data returned
+    if infoDF.empty:
+        logger.ERROR(f"Failed to parse JSON response or no data returned.")
+        raise Exception("Failed to parse JSON response or no data returned.")
+
+    # 3.2 - Extract only athlete and testType data
+    selected_columns = infoDF.columns[infoDF.columns.astype(str).str.startswith('athlete') | infoDF.columns.astype(str).str.startswith('testType')]
+    
+    # 3.3 Narrow down the DataFrame
+    infoDF= infoDF[selected_columns]
+
+    # 4- Create data frame of tags from testType.tags
+    # 4.1 - Function to extract IDs
+    def extract_ids(tags):
+        return [tag['id'] for tag in tags if 'id' in tag]
+
+    # 4.2 - Function to extract names
+    def extract_names(tags):
+        return [tag['name'] for tag in tags if 'name' in tag]
+
+    # 4.3 - Create DataFrame of tags column from infoDF
+    tags = pd.DataFrame(infoDF["testType.tags"])
+
+    # 4.4 - Apply these functions to create new columns in tags
+    tags['tag_ids'] = tags['testType.tags'].apply(extract_ids)
+    tags['tag_names'] = tags['testType.tags'].apply(extract_names)
+
+    # 4.5 - Drop the original column from the tags DataFrame 
+    tags = tags.drop(columns= "testType.tags", axis = 1)
+
+    # 5 - Remove testType.tags from infoDF DataFrame
+    infoDF = infoDF.drop(columns = "testType.tags", axis = 1)
+
+    # 6 - Join New DataFrames together
+    df = dfAll.join(infoDF).join(tags)
+
+    # 7 - change "." to "_" in column names
+    df.columns = [col.replace('.', '_') for col in df.columns]
+
+    # 8 - List all columns from the DataFrame
     columns = df.columns.tolist()
 
-    # Custom order function to prioritize certain columns
+    # 9 - Custom order function to prioritize certain columns
     def custom_order(col):
         if col == 'id':
             return 0
@@ -222,18 +269,27 @@ def responseHandler(json_data):
         elif col.startswith('athlete'):
             return 2
         elif col == 'active':
-            return 3
+            return 7
         elif col.startswith('testType'):
+            return 3
+        elif col.startswith('tag'):
             return 4
         elif col == 'segment':
             return 5
         else:
             return 6
 
-    # Sort columns based on custom order
+    # 10 - Sort columns based on custom order
     sorted_columns = sorted(columns, key=custom_order)
 
-    # Rearrange DataFrame using sorted column names
+    # 11 - Rearrange DataFrame using sorted column names
     df = df[sorted_columns]
 
+    # 12 - change "athlete_external_" to "external_" in column names
+    df.columns = [col.replace('athlete_external_', 'external_') for col in df.columns]
+
     return df
+
+
+
+    

@@ -3,20 +3,22 @@ import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
 from .utils import responseHandler, logger, ConfigManager
 from .AuthManager import AuthManager
 
 #--------------------#
 ## Get All Tests
-def GetTests(from_time=None, to_time=None, sync=False, active=True) -> pd.DataFrame:
-    """Fetches and returns all test trials from an API. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
+def GetTests(from_=None, to_=None, sync=False, active=True) -> pd.DataFrame:
+    """Get all test trials from an account. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
 
     Parameters
     ----------
-    from_time : int, optional
+    from_ : int, optional
         Unix timestamp specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
     
-    to_time : int, optional
+    to_ : int, optional
         Unix timestamp specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
     
     sync : bool, optional
@@ -90,19 +92,19 @@ def GetTests(from_time=None, to_time=None, sync=False, active=True) -> pd.DataFr
 
     # From DateTime
     from_dt = ""
-    if from_time is not None:
+    if from_ is not None:
         if sync:
-            from_dt = f"?syncFrom={from_time}"
+            from_dt = f"?syncFrom={from_}"
         else:
-            from_dt = f"?from={from_time}"
+            from_dt = f"?from={from_}"
 
     # To DateTime
     to_dt = ""
-    if to_time is not None:
-        if from_time is None:
-            to_dt = f"?{'syncTo' if sync else 'to'}={to_time}"
+    if to_ is not None:
+        if from_ is None:
+            to_dt = f"?{'syncTo' if sync else 'to'}={to_}"
         else:
-            to_dt = f"&{'syncTo' if sync else 'to'}={to_time}"
+            to_dt = f"&{'syncTo' if sync else 'to'}={to_}"
 
     # Create URL for request
     url = f"{url_cloud}{from_dt}{to_dt}"

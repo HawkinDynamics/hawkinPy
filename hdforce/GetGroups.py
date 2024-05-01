@@ -1,16 +1,18 @@
 # Dependencies -----
-from .utils import logger, ConfigManager
-from .AuthManager import AuthManager
 import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
+from .utils import logger, ConfigManager
+from .AuthManager import AuthManager
 
 #--------------------#
 ## Get Groups -----
 
 def GetGroups() -> pd.DataFrame:
-    """Fetches and returns group names and IDs from an API.
+    """Get group for an account. This function is designed to retrieve all groups within your organization.
     
     Returns
     -------

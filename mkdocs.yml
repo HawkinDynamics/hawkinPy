@@ -1,0 +1,80 @@
+site_name: hdforce by Hawkin Dynamics
+nav:
+  - Home: index.md
+  - User Guide:
+    - Authentication: UserGuide/EnvSetUp.md
+    - Get Your Data: UserGuide/GetData.md
+    - Example Usage: UserGuide/Examples.md
+  - Function:
+    - AuthManager: Functions/AuthManager.md
+    - LogConfig: Functions/LogConfig.md
+    - GetMetrics: Functions/GetMetrics.md
+    - GetTypes: Functions/GetTypes.md
+    - GetAthletes: Functions/GetAthletes.md
+    - GetTeams: Functions/GetTeams.md
+    - GetGroups: Functions/GetGroups.md
+    - GetTags: Functions/GetTags.md
+    - GetTests: Functions/GetTests.md
+    - GetTestsAth: Functions/GetTestsAth.md
+    - GetTestsType: Functions/GetTestsType.md
+    - GetTestsTeams: Functions/GetTestsTeam.md
+    - GetTestsGroups: Functions/GetTestsGroup.md
+    - GetForceTime: Functions/GetForceTime.md
+  - About:
+    - Changelog: About/changelog.md
+    - Contact: About/contact.md
+    - License: About/license.md
+theme:
+  name: material
+  favicon: img/favicon.ico
+  logo: img/WHITE_H_LOGO.png
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+      primary: blue grey
+      accent: indigo
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to Light mode
+      primary: grey
+      accent: black
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/HawkinDynamics/hawkinPy
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/HawkinDynamics
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/hawkin-dynamics/
+  
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
+
+
+copyright: |
+  &copy; 2024 <a href="https://www.hawkindynamics.com/" target="_blank" rel="noopener">Hawkin Dynamics</a>

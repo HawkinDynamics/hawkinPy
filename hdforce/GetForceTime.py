@@ -1,15 +1,17 @@
-# Create function to call tests by type
-from .utils import logger, ConfigManager
-from .AuthManager import AuthManager
+# Dependencies -----
 import requests
 import pandas as pd
 import os
 import datetime
+# Package imports
+from .LogConfig import LoggerConfig
+from .utils import logger, ConfigManager
+from .AuthManager import AuthManager
 
 #--------------------#
 ## Get Force Time
 def GetForceTime(testId: str) -> pd.DataFrame:
-    """Fetches and returns raw force-time data for an individual test trial from an API.
+    """Get force-time data for an individual test trial from an account.
 
     Parameters
     ----------
@@ -19,10 +21,10 @@ def GetForceTime(testId: str) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        A Pandas DataFrame containing detailed information about the test trial, with columns:
+        A Pandas DataFrame containing details of the test trial, with columns:
         - Time (s): Time elapsed in seconds.
-        - LeftForce (N): Force at time point through left plate.
-        - RightForce (N): Force at time point through right plate.
+        - LeftForce (N): Force at time point from left plate.
+        - RightForce (N): Force at time point from right plate.
         - CombinedForce (N): Combined force (Left + Right) at each time point.
         - Velocity (m/s): Calculated center of mass velocity at each time point.
         - Displacement (m): Calculated center of mass displacement from starting height at each time point.

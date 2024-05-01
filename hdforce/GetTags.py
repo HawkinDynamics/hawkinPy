@@ -1,15 +1,17 @@
 # Dependencies -----
-from .utils import logger, ConfigManager
-from .AuthManager import AuthManager
 import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
+from .utils import logger, ConfigManager
+from .AuthManager import AuthManager
 
 #--------------------#
 ## Get Tags -----
 def GetTags() -> pd.DataFrame:
-    """Fetches and returns tag names, IDs, and descriptions from an API. This function is designed to retrieve all tags within the system.
+    """Get tag names, IDs, and descriptions for an account. This function is designed to retrieve all tags within the system.
 
     Returns
     -------

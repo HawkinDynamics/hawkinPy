@@ -1,13 +1,15 @@
 # Dependencies -----
-from .utils import logger, ConfigManager
-from .AuthManager import AuthManager
 import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
+from .utils import logger, ConfigManager
+from .AuthManager import AuthManager
 
-def GetAthletes(inactive=False) -> pd.DataFrame:
-    """Fetches and returns athlete information from an API.
+def GetAthletes(inactive: bool = False) -> pd.DataFrame:
+    """Get the athlete information from an account.
 
     Parameters
     ----------
@@ -20,8 +22,8 @@ def GetAthletes(inactive=False) -> pd.DataFrame:
         A Pandas DataFrame containing the athletes' information, with columns:
         - id: Athlete's unique identifier.
         - names: Athlete's given full name.
-        - teams: Comma-separated string of athlete's teams.
-        - groups: Comma-separated string of athlete's groups.
+        - teams: A nested list of athlete's team ids as strings.
+        - groups: A nested list of athlete's group ids as strings.
         - active: Boolean indicating if the athlete's profile is active (not archived).
         - external: Columns dynamically created for each external attribute associated with the athletes. (example = external.ExternalId: value)
 
@@ -46,7 +48,7 @@ def GetAthletes(inactive=False) -> pd.DataFrame:
         raise Exception(f"No Access Token found. Run authManager to gain access.")
     elif int(nowtime) >= tokenExp:
         logger.debug("::GetAthletes:: ACCESS_TOKEN expired.")
-        # autheniticate
+        # authenticate
         try:
             AuthManager(
                 region= ConfigManager.region,
@@ -59,7 +61,7 @@ def GetAthletes(inactive=False) -> pd.DataFrame:
             a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
             logger.debug("::GetAthletes - Validate:: ACCESS_TOKEN retrieved")
             tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-            logger.debug("::GetAthletes - Validat:: TOKEN_EXPIRATION retrieved")
+            logger.debug("::GetAthletes - Validate:: TOKEN_EXPIRATION retrieved")
             if a_token is None:
                 logger.error("::GetAthletes - Validate:: No ACCESS_TOKEN found.")
                 raise Exception(f"No Access Token found. Run authManager to gain access.")

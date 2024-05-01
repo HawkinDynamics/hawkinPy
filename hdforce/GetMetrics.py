@@ -1,21 +1,27 @@
 # Dependencies -----
-from .utils import logger, ConfigManager
-from .AuthManager import AuthManager
 import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
+from .utils import logger, ConfigManager
+from .AuthManager import AuthManager
 
 def GetMetrics() -> pd.DataFrame:
     """
-    Fetches and returns test metrics from an API, using an authentication token managed by a TokenManager instance.
+    Get the metrics and ids for all the metrics in the system
 
     Returns
     -------
     pd.DataFrame
         A Pandas DataFrame containing the test metrics, with columns:
+        - canoniclaTestTypeId: The unique identifier for each test type.
+        - testTypeName: The name of each metric.
         - id: The unique identifier for each metric.
-        - name: The name of each metric.
+        - label: The label (common name) for each metric
+        - units: Units of measure
+        - description: Full description of metric and calculation*
 
     Raises
     ------

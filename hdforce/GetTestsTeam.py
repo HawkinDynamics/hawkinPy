@@ -1,20 +1,22 @@
-# Create function to call tests by Teams
+# Dependencies -----
 import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
 from .utils import responseHandler, logger, ConfigManager
 from .AuthManager import AuthManager
 
 #--------------------#    
 ## Tests by Team
 def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
-    """Fetches and returns test trials for specified team(s) from an API. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
+    """Get test trials for specified team(s). Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
 
     Parameters
     ----------
     teamId : str
-        A single team ID or a comma-separated string of team IDs to receive tests from specific teams.
+        A single team ID, tuple or list of team IDs to receive tests from specific teams.
 
     from_ : int, optional
         Unix timestamp specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
@@ -31,7 +33,7 @@ def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = F
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing test trials matching the query criteria, with columns dependent on the test data and the following DataFrame attirbutes:
+        A DataFrame containing test trials matching the query criteria, with columns dependent on the test data and the following DataFrame attributes:
         - Team IDs
         - Last Sync Time
         - Last Test Time
@@ -60,7 +62,7 @@ def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = F
         raise Exception(f"No Access Token found. Run authManager to gain access.")
     elif int(nowtime) >= tokenExp:
         logger.debug("::GetTestsTeam:: ACCESS_TOKEN expired.")
-        # autheniticate
+        # authenticate
         try:
             AuthManager(
                 region= ConfigManager.region,
@@ -73,7 +75,7 @@ def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = F
             a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
             logger.debug("::GetTestsTeam - Validate:: ACCESS_TOKEN retrieved")
             tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-            logger.debug("::GetTestsTeam - Validat:: TOKEN_EXPIRATION retrieved")
+            logger.debug("::GetTestsTeam - Validate:: TOKEN_EXPIRATION retrieved")
             if a_token is None:
                 logger.error("::GetTestsTeam - Validate:: No ACCESS_TOKEN found.")
                 raise Exception(f"No Access Token found. Run authManager to gain access.")

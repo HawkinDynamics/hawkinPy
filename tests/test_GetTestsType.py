@@ -7,9 +7,9 @@ import pandas as pd
 def test_GetTestsType_success():
     
     # Authenticate
-    AuthManager(authMethod = 'file', env_file_name = '.env')
+    AuthManager(authMethod= "file", env_file_name= "tests\.env")
 
     # Call for tests by type
-    response = GetTestsType(typeId = "Countermovement Jump")
+    response = GetTestsType(typeId = "Countermovement Jump", from_=1690859091, to_=1695688065)
     # Check response is DataFrame
     assert isinstance(response, pd.DataFrame)

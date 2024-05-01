@@ -1,13 +1,15 @@
 # Dependencies -----
-from .utils import logger, ConfigManager
-from .AuthManager import AuthManager
 import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
+from .utils import logger, ConfigManager
+from .AuthManager import AuthManager
 
 def GetTypes() -> pd.DataFrame:
-    """Fetches and returns the test type names and IDs from an API.
+    """Get the test type names and IDs from an API.
 
     Returns
     -------

@@ -7,9 +7,9 @@ import pandas as pd
 def test_GetForceTime_success():
     
     # Authenticate
-    AuthManager(authMethod = 'file', env_file_name = '.env')
+    AuthManager(authMethod= "file", env_file_name= "tests\.env")
 
     # Call for ForceTime
-    ftdata = GetForceTime(testId = "9Ytz9g1erMXm3SByTyEd")
+    data = GetForceTime(testId = "9Ytz9g1erMXm3SByTyEd")
     # Check response is DataFrame
-    assert isinstance(ftdata, pd.DataFrame)
+    assert isinstance(data, pd.DataFrame)

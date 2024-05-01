@@ -3,6 +3,8 @@ import requests
 import os
 import datetime
 import pandas as pd
+# Package imports
+from .LogConfig import LoggerConfig
 from .utils import responseHandler, logger, ConfigManager
 from .AuthManager import AuthManager
 
@@ -10,7 +12,7 @@ from .AuthManager import AuthManager
 #--------------------#
 ## Tests by Type
 def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
-    """Fetches and returns test trials based on a specific test type from an API. Allows filtering of results based on time frames and the state of the test (active or not).
+    """Get tests trials based on a specific test type from an API. Allows filtering of results based on time frames and the state of the test (active or not).
 
     Parameters
     ----------
