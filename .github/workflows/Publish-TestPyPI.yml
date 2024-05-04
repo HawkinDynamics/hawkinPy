@@ -2,16 +2,16 @@
 
 name: Publish to TestPyPI
 on:
-  workflow_run:
-    workflows: [Push and Test]
-    types: [completed]
+  push:
+    branches:
+      - dev_env
+
 
 jobs:
   # Job 1: Build the dist files
   build-package:
     name: Build dist
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout Code
