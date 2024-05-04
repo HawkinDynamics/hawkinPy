@@ -55,5 +55,5 @@ jobs:
       
     - name: Run tests with pytest
       env:
-        HD_REFRESH_TOKEN: ${{ secrets.HD_REFRESH_TOKEN_2 }}
+        HD_REFRESH_TOKEN: ${{ secrets.HD_REFRESH_TOKEN }}
       run: poetry run pytest tests/
