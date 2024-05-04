@@ -1,13 +1,17 @@
 # This workflow will build a test version of the package and publish it to TestPyPI for testing
 
 name: Publish to TestPyPI
-on: workflow_dispatch
+on:
+  workflow_run:
+    workflows: [Push and Test]
+    types: [completed]
 
 jobs:
   # Job 1: Build the dist files
   build-package:
     name: Build dist
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout Code
@@ -44,7 +48,9 @@ jobs:
       run: poetry install
 
     - name: Build package with poetry
-      run: poetry build
+      run: 
+        poetry version patch
+        poetry build
 
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
