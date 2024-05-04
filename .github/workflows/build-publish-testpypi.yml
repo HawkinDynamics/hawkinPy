@@ -1,10 +1,11 @@
 # This workflow will build a test version of the package and publish it to TestPyPI for testing
 
-name: Build and Publish to TestPyPI
+name: Publish to TestPyPI
 on:
-  push:
-    branches:
-      - dev_env
+  workflow_run:
+    workflows: [Push and Test]
+    types:
+      - completed
 
 jobs:
   # Job 1: Build the dist files
