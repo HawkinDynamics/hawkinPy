@@ -7,7 +7,7 @@ Get test trials for specified team(s). Allows filtering of results based on time
 __`teamId`__: _(str)_ A single team ID, tuple or list of team IDs to receive tests from specific teams.
 
 __`from_`__: _(int)_ Unix timestamp specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
-    
+
 __`to_`__: _(int)_ Unix timestamp specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
 
 __`sync`__: _(bool)_ If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.

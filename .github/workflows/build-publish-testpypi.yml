@@ -1,0 +1,86 @@
+# This workflow will build a test version of the package and publish it to TestPyPI for testing
+
+name: Build and Publish to TestPyPI
+
+on:
+    workflow_run:
+      workflows: ["Push and Test"]
+      types:
+        - completed
+      branches: 
+        - dev
+
+jobs:
+  # Job 1: Build the dist files
+  build-package:
+    name: Build dist
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v5
+      id: setuppython
+      with:
+        python-version: '3.x'
+
+    - name: Get pip cache dir
+      id: pip-cache
+      run: |
+        echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+    - name: cache dependecies
+      uses: actions/cache@v4
+      id: cache
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Poetry
+      if: steps.cache.outputs.cache-hit != 'true'
+      run:
+        python -m pip install --upgrade pip
+        pip install poetry
+
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: poetry install
+
+    - name: Build package with poetry
+      run: poetry build
+
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+  
+  # Job 2: Publish to TestPyPI
+  publish-to-testpypi:
+    name: Publish to TestPyPI
+    needs:
+    - build-package
+    runs-on: ubuntu-latest
+
+    environment:
+      name: hawkinpy-hdforce
+      url: https://test.pypi.org/p/hdforce
+
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution 📦 to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/

@@ -5,7 +5,7 @@ Get all test trials from an account. Allows filtering of results based on time f
 
 ### Parameters
 __`from_`__: _(int)_ Unix timestamp specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
-    
+
 __`to_`__: _(int)_ Unix timestamp specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
 
 __`sync`__: _(bool)_ If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
@@ -17,8 +17,8 @@ A Pandas DataFrame containing details of the test trial, with columns:
 
 * __id__: Unique test id
 * __timestamp__: Unix timestamp of the the recording time of the trial.
-* __athlete_data__: Columns of athlete data. Same as DataFrame returned from GetAthletes(.id, .name, .teams, .groups, .active, extranal.name)
-* __testType_data__: Columns of test type data(.id, .name, .canonicalId, .groups, .active, extranal.name)
+* __athlete_data__: Columns of athlete data. Same as DataFrame returned from GetAthletes(.id, .name, .teams, .groups, .active, external.name)
+* __testType_data__: Columns of test type data(.id, .name, .canonicalId, .groups, .active, external.name)
 * __tags_data__: Columns of test tags data(.id, .name). Each is a list of any applicable values.
 * __all test metrics__: Calculated center of mass displacement from starting height at each time point.
 
@@ -46,7 +46,7 @@ from hdforce import GetTests
 # Get test data between these dates
 Data = GetTests(from_ = 1690859091, to_ = 1711392994)
 
-# Print DataFrame Attibutes
+# Print DataFrame Attributes
 print(f"Count: {Data.attrs["Count"]}")
 print(f"Last Sync:{Data.attrs["Last Sync"]}")
 print(f"Last Test Time: {Data.attrs["Last Test Time"]}")

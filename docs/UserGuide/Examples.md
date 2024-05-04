@@ -18,7 +18,7 @@ from hdforce import AuthManager
 
 AuthManager(
     region = "Americas", 
-    authMethod: "env", 
+    authMethod = "env", 
     refreshToken_name = "HD_REFRESH_TOKEN", 
     refreshToken = "YourRefreshTokenHere"
     )
@@ -42,7 +42,7 @@ from hdforce import AuthManager
 
 AuthManager(
     region = "Europe", 
-    authMethod: "file", 
+    authMethod = "file", 
     refreshToken_name = "HD_REFRESH_TOKEN", 
     refreshToken = "YourRefreshTokenHere",
     env_file_name = ".env"
@@ -58,7 +58,7 @@ import hdforce as hd
 types = hd.GetTypes()
 
 # Get all athletes (including inactive)
-players = hd.GetAthletes( inactive = True)
+players = hd.GetAthletes( inactive = True )
 
 # Get Teams, Groups, Tags for filtering tests
 teams = hd.GetTeams()

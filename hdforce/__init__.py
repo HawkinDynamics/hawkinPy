@@ -1,6 +1,6 @@
 # From Utils
 from .AuthManager import AuthManager
-from .LogConfig import LogConfig
+from .LoggerConfig import LoggerConfig
 
 # From Get Tests
 from .GetForceTime import GetForceTime

@@ -1,70 +1,72 @@
-#import pandas as pd
+# Dependencies
 import pandas as pd
 from pandas import json_normalize
 import requests
 import datetime
-import logging
 import os
 from dotenv import load_dotenv, set_key
-from .LogConfig import LoggerConfig
+from .LoggerConfig import LoggerConfig
 
-# Check if logging has been configured, if not, set up default logging
-if not LoggerConfig.configured:
-    LoggerConfig.setup_logger()  # Using default parameters
-# Initialize logging
-logger = logging.getLogger('hdforce')
-# Initialize logging
-logger = logging.getLogger('hdforce')
+# Get a logger specific to this module
+logger = LoggerConfig.get_logger(__name__)
 
-#--------------------#
+# -------------------- #
 # Configuration Manager
-#config_manager_code 
+
+
 class ConfigManager:
     # Class to manage configuration for environment variables source
     env_method = 'env'  # Default to system environment variables
     file_name = None
 
     @classmethod
-    def set_env_source(cls, region, method, fileName, token_name, token):
+    def set_env_source(self, region, method, fileName, token_name, token):
         # Set the source of environment variables ('file' or 'system')
         if method not in ['file', 'env', 'manual']:
-            logger.error("::set_env_source:: Source must be 'file', 'env', or 'manual'")
+            logger.error("Source must be 'file', 'env', or 'manual'")
             raise ValueError("Source must be 'file', 'env', or 'manual'.")
-        cls.env_method = method
+
+        self.env_method = method
+        logger.debug(f"method: {method}")
 
         # Set the .env file name
         if method == 'file':
             if not fileName:
-                logger.error("::set_env_source:: File path must be provided when source is 'file'")
+                logger.error("File path must be provided when source is 'file'")
                 raise ValueError("File path must be provided when source is 'file'")
-            cls.file_name = fileName
-        
-        # Set other Auth arguments
-        cls.token_name = token_name     # Refresh Token Name
-        cls.refresh_token = token       # Refresh Token
-        cls.region = region             # Region
+            self.file_name = fileName
+            logger.debug(f"file name: {fileName}")
 
-        
+        # Set other Auth arguments
+        self.token_name = token_name     # Refresh Token Name
+        logger.debug(f"token name: {token_name}")
+        self.refresh_token = token       # Refresh Token
+        tabrv = token[0:6]
+        logger.debug(f"refresh token: {tabrv}xxxx")
+        self.region = region             # Region
+        logger.debug(f"region: {region}")
 
     @classmethod
-    def get_env_variable(cls, var_name):
+    def get_env_variable(self, var_name):
         # Get an environment variable from the specified source
-        if cls.env_method == 'file':
-            if not cls.file_name:
-                logger.error("::get_env_variable:: File path must be provided when source is 'file'")
+        if self.env_method == 'file':
+            if not self.file_name:
+                logger.error("File path must be provided when source is 'file'")
                 raise ValueError("File path must be provided when source is 'file'")
             from dotenv import load_dotenv
             import os
-            load_dotenv(cls.file_name)
+            load_dotenv(self.file_name, override=True)
             return os.getenv(var_name)
         else:
             import os
             return os.getenv(var_name)
 
 
-#--------------------#
+# -------------------- #
 # Variable Manager
-def varsManager( name: str, method: str, file: str = None, value: str = None) -> str:
+
+
+def varsManager(name: str, method: str, file: str = None, value: str = None) -> str:
     """ Get or set a token value
 
     Parameters
@@ -77,24 +79,31 @@ def varsManager( name: str, method: str, file: str = None, value: str = None) ->
     """
     # Load environment file if necessary
     if method == 'file':
-        load_dotenv(str(file))
         if value is not None:
-            set_key(str(file),str(name), str(value))
-            token = value
+            set_key(str(file), str(name), str(value))
+            logger.debug(f"Key Set: file({str(file)}) | name({str(name)}) | value({str(value)})")
+            load_dotenv(str(file), override=True)
+            token = str(value)
+            logger.debug(f"token: {value}")
         else:
             token = os.getenv(str(name))
     else:
         if value is not None:
             os.environ[str(name)] = str(value)
-            token = value
+            logger.debug(f"Key Set: env | name({str(name)}) | value({str(value)})")
+            token = str(value)
+            logger.debug(f"token: {os.getenv(str(value))}")
         else:
             token = os.getenv(str(name))
+            logger.debug(f"token: {os.getenv(str(name))}")
 
-    return(token)
+    return token
 
 
-#--------------------#
+# -------------------- #
 # Token Manager Class
+
+
 class TokenManager:
     """Manages authentication tokens for accessing an API, including token retrieval and refresh.
 
@@ -127,14 +136,15 @@ class TokenManager:
         Stores the base URL for the API corresponding to the region.
     """
     # Class attributes
-    def __init__(self, refreshToken, region):
-            self.refreshToken = refreshToken
-            self.region = region
-            self.accessToken = None
-            self.ExpirationVal = None
-            self.ExpirationStr = None
-            self.url_cloud = None
-            self.get_access()
+    def __init__(self, refreshToken, region, fileName):
+        self.refreshToken = refreshToken
+        self.region = region
+        self.accessToken = None
+        self.ExpirationVal = None
+        self.ExpirationStr = None
+        self.url_cloud = None
+        self.fileName = fileName
+        self.get_access()
 
     # Get access token and exp
     def get_access(self):
@@ -164,7 +174,11 @@ class TokenManager:
             self.accessToken = token_response['access_token']
             self.ExpirationStr = datetime.datetime.fromtimestamp(token_response['expires_at'])
             self.ExpirationVal = int(token_response['expires_at'])
-            logger.debug(f"::TokenManager:: Access token retrieved successfully")
+            # Debug logs
+            if int(datetime.datetime.timestamp(datetime.datetime.now())) >= self.ExpirationVal:
+                logger.debug(f"Fail |Access token expired: {self.ExpirationVal}")
+            else:
+                logger.debug(f"Pass | Access token retrieved successfully. Expires: {self.ExpirationVal}")
         else:  # error
             error_msg = {
                 401: "Error 401: Refresh Token is invalid or expired.",
@@ -175,8 +189,10 @@ class TokenManager:
             raise ValueError(error_msg)
 
 
-#--------------------#
+# -------------------- #
 # Response Handler for test calls
+
+
 def responseHandler(json_data):
     """Parses and arranges the JSON response from the API into a structured Pandas DataFrame.
 
@@ -194,6 +210,7 @@ def responseHandler(json_data):
     """
     # 1 - Create normalized DataFrame
     dfAll = json_normalize(json_data['data'], errors='ignore')
+        
 
     # 2 - Remove athlete and testType columns
     # 2.1 - Generate a list of columns to drop
@@ -204,30 +221,28 @@ def responseHandler(json_data):
 
     # 3.1 - Create DataFrame of athlete and testType info
     infoDF = pd.json_normalize(
-        json_data['data'],
-        meta=[
-            'id',
-            ['athlete', 'id'],
-            ['athlete', 'name'],
-            ['athlete', 'teams'],
-            ['athlete', 'groups'],
-            ['athlete', 'active'],
-            ['testType', 'id'],
-            ['testType', 'name'],
-            ['testType', 'canonicalId']
-        ], errors='ignore'
-    )
+            json_data['data'],
+            meta=[
+                'id',
+                ['athlete', 'id'],
+                ['athlete', 'name'],
+                ['athlete', 'teams'],
+                ['athlete', 'groups'],
+                ['athlete', 'active'],
+                ['testType', 'id'],
+                ['testType', 'name'],
+                ['testType', 'canonicalId']
+            ], errors='ignore'
+        )
 
-    # Check for data returned
-    if infoDF.empty:
-        logger.ERROR(f"Failed to parse JSON response or no data returned.")
-        raise Exception("Failed to parse JSON response or no data returned.")
-
+    # 4.3 - Create DataFrame of tags column from infoDF
+    tags = pd.DataFrame(infoDF["testType.tags"])
+    
     # 3.2 - Extract only athlete and testType data
     selected_columns = infoDF.columns[infoDF.columns.astype(str).str.startswith('athlete') | infoDF.columns.astype(str).str.startswith('testType')]
-    
+
     # 3.3 Narrow down the DataFrame
-    infoDF= infoDF[selected_columns]
+    infoDF = infoDF[selected_columns]
 
     # 4- Create data frame of tags from testType.tags
     # 4.1 - Function to extract IDs
@@ -239,17 +254,17 @@ def responseHandler(json_data):
         return [tag['name'] for tag in tags if 'name' in tag]
 
     # 4.3 - Create DataFrame of tags column from infoDF
-    tags = pd.DataFrame(infoDF["testType.tags"])
+        tags = pd.DataFrame(infoDF["testType.tags"])
 
     # 4.4 - Apply these functions to create new columns in tags
     tags['tag_ids'] = tags['testType.tags'].apply(extract_ids)
     tags['tag_names'] = tags['testType.tags'].apply(extract_names)
 
-    # 4.5 - Drop the original column from the tags DataFrame 
-    tags = tags.drop(columns= "testType.tags", axis = 1)
+    # 4.5 - Drop the original column from the tags DataFrame
+    tags = tags.drop(columns="testType.tags", axis=1)
 
     # 5 - Remove testType.tags from infoDF DataFrame
-    infoDF = infoDF.drop(columns = "testType.tags", axis = 1)
+    infoDF = infoDF.drop(columns="testType.tags", axis=1)
 
     # 6 - Join New DataFrames together
     df = dfAll.join(infoDF).join(tags)
@@ -289,7 +304,3 @@ def responseHandler(json_data):
     df.columns = [col.replace('athlete_external_', 'external_') for col in df.columns]
 
     return df
-
-
-
-    

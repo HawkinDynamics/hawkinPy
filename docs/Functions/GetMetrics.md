@@ -6,7 +6,7 @@ Gets the test metrics details from Hawkin Dynamics System.
 ### Returns
 A Pandas DataFrame containing the information for the metrics of each test type, with columns:
 
-* __canoniclaTestTypeId__: The unique identifier for each test type.
+* __canonicalTestTypeId__: The unique identifier for each test type.
 * __testTypeName__: The name of each metric.
 * __id__: The unique identifier for each metric.
 * __label__: The label (common name) for each metric

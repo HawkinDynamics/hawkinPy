@@ -4,7 +4,7 @@
 
 <!-- badges: start -->
 ![GitHub Release](https://img.shields.io/github/v/release/HawkinDynamics/hawkinPy)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2024--04--24-yellowgreen.svg)](/commits/dev_man)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2024--05--04-yellowgreen.svg)](/commits/dev_man)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)

@@ -4,13 +4,13 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .LogConfig import LoggerConfig
 from .utils import responseHandler, logger, ConfigManager
 from .AuthManager import AuthManager
 
+# -------------------- #
+# Tests by Type
 
-#--------------------#
-## Tests by Type
+
 def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
     """Get tests trials based on a specific test type from an API. Allows filtering of results based on time frames and the state of the test (active or not).
 
@@ -34,7 +34,7 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing test trials matching the query criteria, with appropriate columns depending on the test data and the following DataFrame attirbutes:
+        A DataFrame containing test trials matching the query criteria, with appropriate columns depending on the test data and the following DataFrame attributes:
         - Canonical ID
         - ATest Type Name
         - Last Sync Time
@@ -50,48 +50,49 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
     """
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
-    logger.debug("::GetTestsType:: ACCESS_TOKEN retrieved")
     tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-    logger.debug("::GetTestsType:: TOKEN_EXPIRATION retrieved")
+    logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # get current time in timestamp
     now = datetime.datetime.now()
     nowtime = datetime.datetime.timestamp(now)
+    if nowtime < tokenExp:
+        logger.debug(f"Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Validate refresh token and expiration
     if a_token is None:
-        logger.error("::GetTestsType:: No ACCESS_TOKEN found.")
-        raise Exception(f"No Access Token found. Run authManager to gain access.")
+        logger.error("No Access Token found.")
+        raise Exception("No Access Token found.")
     elif int(nowtime) >= tokenExp:
-        logger.debug("::GetTestsType:: ACCESS_TOKEN expired.")
-        # autheniticate
+        logger.debug(f"Token Expired: {datetime.datetime.fromtimestamp(tokenExp)}")
+        # authenticate
         try:
             AuthManager(
-                region= ConfigManager.region,
-                authMethod= ConfigManager.env_method,
-                refreshToken_name= ConfigManager.token_name,
-                refreshToken= ConfigManager.refresh_token,
-                env_file_name= ConfigManager.file_name
+                region=ConfigManager.region,
+                authMethod=ConfigManager.env_method,
+                refreshToken_name=ConfigManager.token_name,
+                refreshToken=ConfigManager.refresh_token,
+                env_file_name=ConfigManager.file_name
             )
             # Retrieve Access Token and check expiration
             a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
-            logger.debug("::GetTestsType - Validate:: ACCESS_TOKEN retrieved")
+            logger.debug("New ACCESS_TOKEN retrieved")
             tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-            logger.debug("::GetTestsType - Validat:: TOKEN_EXPIRATION retrieved")
+            logger.debug("TOKEN_EXPIRATION retrieved")
             if a_token is None:
-                logger.error("::GetTestsType - Validate:: No ACCESS_TOKEN found.")
-                raise Exception(f"No Access Token found. Run authManager to gain access.")
+                logger.error("No Access Token found.")
+                raise Exception("No Access Token found.")
             elif int(nowtime) >= tokenExp:
-                logger.error("::GetTestsType - Validate:: ACCESS_TOKEN expired.")
-                raise Exception(f"Token expired. Run authManager to gain access.")
+                logger.debug(f"Token Expired: {datetime.datetime.fromtimestamp(tokenExp)}")
+                raise Exception("Token expired")
             else:
-                logger.debug("::GetTestsType - Validate:: ACCESS_TOKEN retrieved and valid.")
+                logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
                 pass
         except ValueError:
-            logger.error("::GetTestsType - Validate:: Failed to authenticate. Try AuthManager")
-            raise Exception("Failed to authenticate. Try AuthManage") 
+            logger.error("Failed to authenticate. Try AuthManager")
+            raise Exception("Failed to authenticate. Try AuthManage")
     else:
-        logger.debug("::GetTestsType:: ACCESS_TOKEN retrieved and valid.")
+        logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # API Cloud URL
     url_cloud = os.getenv("CLOUD_URL")
@@ -116,13 +117,13 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
     type_ids = {
         "7nNduHeM5zETPjHxvm7s": ["7nNduHeM5zETPjHxvm7s", "Countermovement Jump", "CMJ"],
         "QEG7m7DhYsD6BrcQ8pic": ["QEG7m7DhYsD6BrcQ8pic", "Squat Jump", "SJ"],
-        "2uS5XD5kXmWgIZ5HhQ3A": [ "2uS5XD5kXmWgIZ5HhQ3A", "Isometric Test", "ISO"],
-        "gyBETpRXpdr63Ab2E0V8": [ "gyBETpRXpdr63Ab2E0V8", "Drop Jump", "DJ"],
-        "5pRSUQVSJVnxijpPMck3": [ "5pRSUQVSJVnxijpPMck3", "Free Run", "FREE"],
-        "pqgf2TPUOQOQs6r0HQWb": [ "pqgf2TPUOQOQs6r0HQWb", "CMJ Rebound", "CMJR"],
-        "r4fhrkPdYlLxYQxEeM78": [ "r4fhrkPdYlLxYQxEeM78", "Multi Rebound", "MR"],
-        "ubeWMPN1lJFbuQbAM97s": [ "ubeWMPN1lJFbuQbAM97s", "Weigh In", "WI"],
-        "rKgI4y3ItTAzUekTUpvR": [ "rKgI4y3ItTAzUekTUpvR", "Drop Landing", "DL"]
+        "2uS5XD5kXmWgIZ5HhQ3A": ["2uS5XD5kXmWgIZ5HhQ3A", "Isometric Test", "ISO"],
+        "gyBETpRXpdr63Ab2E0V8": ["gyBETpRXpdr63Ab2E0V8", "Drop Jump", "DJ"],
+        "5pRSUQVSJVnxijpPMck3": ["5pRSUQVSJVnxijpPMck3", "Free Run", "FREE"],
+        "pqgf2TPUOQOQs6r0HQWb": ["pqgf2TPUOQOQs6r0HQWb", "CMJ Rebound", "CMJR"],
+        "r4fhrkPdYlLxYQxEeM78": ["r4fhrkPdYlLxYQxEeM78", "Multi Rebound", "MR"],
+        "ubeWMPN1lJFbuQbAM97s": ["ubeWMPN1lJFbuQbAM97s", "Weigh In", "WI"],
+        "rKgI4y3ItTAzUekTUpvR": ["rKgI4y3ItTAzUekTUpvR", "Drop Landing", "DL"]
     }
 
     for key, values in type_ids.items():
@@ -130,7 +131,7 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
             t_id = key
             break
     else:
-        logger.error("::GetTestsType:: typeId incorrect. Check your entry")
+        logger.error("typeId incorrect. Check your entry")
         raise Exception("typeId incorrect. Check your entry")
 
     # Create URL for request
@@ -139,35 +140,51 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
     response = requests.get(url, headers=headers)
-    logger.debug(f"::GetTestsType:: GET request sent for Tests by test type: {t_id}.")
+    # Log request
+    if from_dt is not None and to_dt is not None:
+        logger.debug(f"Test Type Request from_dt to_dt")
+    elif from_dt is None:
+        logger.debug(f"Test Type Request to_dt")
+    elif to_dt is None:
+        logger.debug(f"Test Type Request from_dt")
 
     # Check response status and handle data accordingly
     if response.status_code != 200:
-        logger.error(f"::GetTestsType:: Error {response.status_code}: {response.reason}")
+        logger.error(f"Error {response.status_code}: {response.reason}")
         raise Exception(f"Error {response.status_code}: {response.reason}")
 
     try:
         data = response.json()
+        # Check if the data dictionary is empty
+        if data.get('count', 0) == 0:
+            logger.info("No tests returned from query")
+            return "No tests returned from query"
+
         # run data handler function
         df = responseHandler(data)
 
         # Filter active tests if required
         if 'active' in df.columns and active:
             df = df[df['active'] == True]
-        
+
         # Create Test Type info for df attrs
         if t_id in type_ids:
             type_info = type_ids[t_id]
 
         # Setting attributes
-        df.attrs['Cannonical Id'] = type_info[0]
+        df.attrs['Canonical Id'] = type_info[0]
         df.attrs['Test Type Name'] = type_info[1]
-        df.attrs['Last Sync'] = data['lastSyncTime']
-        df.attrs['Last Test Time'] = data['lastTestTime']
-        df.attrs['Count'] = data['count']
-        logger.info(f"::GetTestsType:: Request successful. Returned {df.attrs['Count']} {df.attrs['Test Type Name']} tests.")  
+        df.attrs['Last Sync'] = int(data['lastSyncTime'])
+        df.attrs['Last Test Time'] = int(data['lastTestTime'])
+        df.attrs['Count'] = int(data['count'])
+        logger.info(f"Request successful. Returned {df.attrs['Count']} {df.attrs['Test Type Name']} tests.")
         return df
-    
-    except ValueError:
-        logger.error("::GetTestsType:: Failed to parse JSON response or no data returned.")
-        raise Exception("Failed to parse JSON response or no data returned.")
+
+    except requests.RequestException as e:
+        return f"Request Error: {e}"
+
+    except ValueError as e:
+        return f"JSON Error: {e}"
+
+    except Exception as e:
+        return f"An error occurred: {e}"

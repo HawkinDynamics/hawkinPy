@@ -7,17 +7,16 @@ readme = "README.md"
 keywords = ["hawkin", "force plates", "sports science"]
 homepage = "https://www.hawkindynamics.com/"
 repository = "https://github.com/HawkinDynamics/hawkinPy"
-documentation = "https://hawkindynamics.github.io/hawkinPy/index.html"
+documentation = "https://silver-adventure-22j19qq.pages.github.io/"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "Topic :: Software Development :: Build Tools",
   "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.6",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 
 
@@ -26,12 +25,12 @@ python = ">=3.9,<4.0"
 pandas = "^2.2.0"
 python-dotenv = "^1.0.1"
 requests = "^2.31.0"
-setuptools_scm = "^6.0"
+pytest = "^8.2.0"
+flake8 = "^7.0.0"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.4"
 
 [build-system]
-requires = ["poetry-core", "setuptools_scm"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.setuptools_scm]
-write_to = "hdforce/version.py"
-fallback_version = "0.1.0"

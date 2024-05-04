@@ -4,12 +4,13 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .LogConfig import LoggerConfig
 from .utils import responseHandler, logger, ConfigManager
 from .AuthManager import AuthManager
 
-#--------------------#    
-## Tests by Group
+# -------------------- #
+# Tests by Group
+
+
 def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
     """Get test trials for specified team(s). Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
 
@@ -33,7 +34,7 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing test trials matching the query criteria, with columns dependent on the test data and the following DataFrame attirbutes:
+        A DataFrame containing test trials matching the query criteria, with columns dependent on the test data and the following DataFrame attributes:
         - Group IDs
         - Last Sync Time
         - Last Test Time
@@ -48,48 +49,49 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
     """
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
-    logger.debug("::GetTestsGroup:: ACCESS_TOKEN retrieved")
     tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-    logger.debug("::GetTestsGroup:: TOKEN_EXPIRATION retrieved")
+    logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # get current time in timestamp
     now = datetime.datetime.now()
     nowtime = datetime.datetime.timestamp(now)
+    if nowtime < tokenExp:
+        logger.debug(f"Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Validate refresh token and expiration
     if a_token is None:
-        logger.error("::GetTestsGroup:: No ACCESS_TOKEN found.")
-        raise Exception(f"No Access Token found. Run authManager to gain access.")
+        logger.error("No Access Token found.")
+        raise Exception("No Access Token found.")
     elif int(nowtime) >= tokenExp:
-        logger.debug("::GetTestsGroup:: ACCESS_TOKEN expired.")
+        logger.debug(f"Token Expired: {datetime.datetime.fromtimestamp(tokenExp)}")
         # authenticate
         try:
             AuthManager(
-                region= ConfigManager.region,
-                authMethod= ConfigManager.env_method,
-                refreshToken_name= ConfigManager.token_name,
-                refreshToken= ConfigManager.refresh_token,
-                env_file_name= ConfigManager.file_name
+                region=ConfigManager.region,
+                authMethod=ConfigManager.env_method,
+                refreshToken_name=ConfigManager.token_name,
+                refreshToken=ConfigManager.refresh_token,
+                env_file_name=ConfigManager.file_name
             )
             # Retrieve Access Token and check expiration
             a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
-            logger.debug("::GetTestsGroup - Validate:: ACCESS_TOKEN retrieved")
+            logger.debug("New ACCESS_TOKEN retrieved")
             tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-            logger.debug("::GetTestsGroup - Validate:: TOKEN_EXPIRATION retrieved")
+            logger.debug("TOKEN_EXPIRATION retrieved")
             if a_token is None:
-                logger.error("::GetTestsGroup - Validate:: No ACCESS_TOKEN found.")
-                raise Exception(f"No Access Token found. Run authManager to gain access.")
+                logger.error("No Access Token found.")
+                raise Exception("No Access Token found.")
             elif int(nowtime) >= tokenExp:
-                logger.error("::GetTestsGroup - Validate:: ACCESS_TOKEN expired.")
-                raise Exception(f"Token expired. Run authManager to gain access.")
+                logger.debug(f"Token Expired: {datetime.datetime.fromtimestamp(tokenExp)}")
+                raise Exception("Token expired")
             else:
-                logger.debug("::GetTestsGroup - Validate:: ACCESS_TOKEN retrieved and valid.")
+                logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
                 pass
         except ValueError:
-            logger.error("::GetTestsGroup - Validate:: Failed to authenticate. Try AuthManager")
-            raise Exception("Failed to authenticate. Try AuthManage") 
+            logger.error("Failed to authenticate. Try AuthManager")
+            raise Exception("Failed to authenticate. Try AuthManage")
     else:
-        logger.debug("::GetTestsGroup:: ACCESS_TOKEN retrieved and valid.")
+        logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # API Cloud URL
     url_cloud = os.getenv("CLOUD_URL")
@@ -114,9 +116,8 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
     if isinstance(groupId, str):
         g_id = groupId
     else:
-        logger.error("::GetTestsGroup:: groupId incorrect. Check your entry")
+        logger.error("groupId incorrect. Check your entry")
         raise Exception("groupId incorrect. Check your entry")
-        
 
     # Create URL for request
     url = f"{url_cloud}?groupId={g_id}{from_dt}{to_dt}"
@@ -124,16 +125,26 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
     response = requests.get(url, headers=headers)
-    logger.debug(f"::GetTestsGroup:: GET request sent for Tests by Groups: {g_id}.")
-
+    # Log request
+    if from_dt is not None and to_dt is not None:
+        logger.debug(f"Group Test Request from_dt to_dt")
+    elif from_dt is None:
+        logger.debug(f"Group Test Request to_dt")
+    elif to_dt is None:
+        logger.debug(f"Group Test Request from_dt")
 
     # Check response status and handle data accordingly
     if response.status_code != 200:
-        logger.error(f"::GetTestsGroup:: Error {response.status_code}: {response.reason}")
+        logger.error(f"Error {response.status_code}: {response.reason}")
         raise Exception(f"Error {response.status_code}: {response.reason}")
 
     try:
         data = response.json()
+        # Check if the data dictionary is empty
+        if data.get('count', 0) == 0:
+            logger.info("No tests returned from query")
+            return "No tests returned from query"
+        
         # run data handler function
         df = responseHandler(data)
 
@@ -143,13 +154,17 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
 
         # Setting attributes
         df.attrs['Group Id'] = groupId
-        df.attrs['Last Sync'] = data['lastSyncTime']
-        df.attrs['Last Test Time'] = data['lastTestTime']
-        df.attrs['Count'] = data['count']
-        logger.info(f"::GetTestsGroup:: Request successful. Returned {df.attrs['Count']} tests from Groups: {groupId}.")
+        df.attrs['Last Sync'] = int(data['lastSyncTime'])
+        df.attrs['Last Test Time'] = int(data['lastTestTime'])
+        df.attrs['Count'] = int(data['count'])
+        logger.info(f"Request successful. Returned {df.attrs['Count']} tests from Groups: {groupId}.")
         return df
-    
-    except ValueError:
-        logger.error("::GetTestsGroup:: Failed to parse JSON response or no data returned.")
-        raise Exception("Failed to parse JSON response or no data returned.")
-    
+
+    except requests.RequestException as e:
+        return f"Request Error: {e}"
+
+    except ValueError as e:
+        return f"JSON Error: {e}"
+
+    except Exception as e:
+        return f"An error occurred: {e}"

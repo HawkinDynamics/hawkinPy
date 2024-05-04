@@ -6,7 +6,7 @@ Choose the authentication method and settings for your project environment. If y
 ### Parameters
 __`region`__: (_str_) The region that designates the url prefix. Defaults to "Americas". Other options include "Americas", "Europe", and "Asia/Pacific".
 
-__`authMethod`__: (_str_) Determine method of storing authenitcation variables, including refresh token. One of 'env', 'file', 'manual'. To store variables in your local system environment, use "env". To store vaiables in a .env file, use "file".  To authenticate without storing your refresh token and region, use "maual".
+__`authMethod`__: (_str_) Determine method of storing authentication variables, including refresh token. One of 'env', 'file', 'manual'. To store variables in your local system environment, use "env". To store variables in a .env file, use "file".  To authenticate without storing your refresh token and region, use "manual".
 
 __`refreshToken_name`__: (_str_) Name of refresh token variable saved in system environment or .env file. Template .env file shows this as "HD_REFRESH_TOKEN".
 

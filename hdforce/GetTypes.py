@@ -4,9 +4,12 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .LogConfig import LoggerConfig
 from .utils import logger, ConfigManager
 from .AuthManager import AuthManager
+
+# -------------------- #
+# Get Test Types
+
 
 def GetTypes() -> pd.DataFrame:
     """Get the test type names and IDs from an API.
@@ -26,48 +29,49 @@ def GetTypes() -> pd.DataFrame:
     """
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
-    logger.debug("::GetTypes:: ACCESS_TOKEN retrieved")
     tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-    logger.debug("::GetTypes:: TOKEN_EXPIRATION retrieved")
+    logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # get current time in timestamp
     now = datetime.datetime.now()
     nowtime = datetime.datetime.timestamp(now)
+    if nowtime < tokenExp:
+        logger.debug(f"Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Validate refresh token and expiration
     if a_token is None:
-        logger.error("::GetTypes:: No ACCESS_TOKEN found.")
-        raise Exception(f"No Access Token found. Run authManager to gain access.")
+        logger.error("No Access Token found.")
+        raise Exception("No Access Token found.")
     elif int(nowtime) >= tokenExp:
-        logger.debug("::GetTypes:: ACCESS_TOKEN expired.")
-        # autheniticate
+        logger.debug(f"Token Expired: {datetime.datetime.fromtimestamp(tokenExp)}")
+        # authenticate
         try:
             AuthManager(
-                region= ConfigManager.region,
-                authMethod= ConfigManager.env_method,
-                refreshToken_name= ConfigManager.token_name,
-                refreshToken= ConfigManager.refresh_token,
-                env_file_name= ConfigManager.file_name
+                region=ConfigManager.region,
+                authMethod=ConfigManager.env_method,
+                refreshToken_name=ConfigManager.token_name,
+                refreshToken=ConfigManager.refresh_token,
+                env_file_name=ConfigManager.file_name
             )
             # Retrieve Access Token and check expiration
             a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
-            logger.debug("::GetTypes - Validate:: ACCESS_TOKEN retrieved")
+            logger.debug("New ACCESS_TOKEN retrieved")
             tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-            logger.debug("::GetTypes - Validat:: TOKEN_EXPIRATION retrieved")
+            logger.debug("TOKEN_EXPIRATION retrieved")
             if a_token is None:
-                logger.error("::GetTypes - Validate:: No ACCESS_TOKEN found.")
-                raise Exception(f"No Access Token found. Run authManager to gain access.")
+                logger.error("No Access Token found.")
+                raise Exception("No Access Token found.")
             elif int(nowtime) >= tokenExp:
-                logger.error("::GetTypes - Validate:: ACCESS_TOKEN expired.")
-                raise Exception(f"Token expired. Run authManager to gain access.")
+                logger.debug(f"Token Expired: {datetime.datetime.fromtimestamp(tokenExp)}")
+                raise Exception("Token expired")
             else:
-                logger.debug("::GetTypes - Validate:: ACCESS_TOKEN retrieved and valid.")
+                logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
                 pass
         except ValueError:
-            logger.error("::GetTypes - Validate:: Failed to authenticate. Try AuthManager")
-            raise Exception("Failed to authenticate. Try AuthManage") 
+            logger.error("Failed to authenticate. Try AuthManager")
+            raise Exception("Failed to authenticate. Try AuthManage")
     else:
-        logger.debug("::GetTypes:: ACCESS_TOKEN retrieved and valid.")
+        logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # API Cloud URL
     url_cloud = os.getenv("CLOUD_URL")
@@ -80,21 +84,23 @@ def GetTypes() -> pd.DataFrame:
 
     # Send the GET request to the API
     response = requests.get(url, headers=headers)
-    logger.debug("::GetTypes:: GET request sent for Test Types.")
+    logger.debug("GET request sent for Test Types.")
 
     # Check if the API response was successful
     if response.status_code != 200:
-        logger.error(f"::GetTypes:: Error {response.status_code}: {response.reason}")
+        logger.error(f"Error {response.status_code}: {response.reason}")
         raise Exception(f"Error {response.status_code}: {response.reason}")
 
-    # Try to parse the JSON data returned by the API
+    # If successful
     try:
         data = response.json()
         df = pd.DataFrame.from_records(data)
+
+        df.attrs['Count'] = int(len(df.index))
         count = str(len(df.index))
-        logger.info(f"::GetTypes:: Request successful. Types returned: {count}")
+        logger.info(f"Request successful. Types returned: {count}")
         return df
-    
+
     except ValueError:
-        logger.error("::GetTypes:: Failed to parse JSON response or no data returned.")
+        logger.error("Failed to parse JSON response or no data returned.")
         raise Exception("Failed to parse JSON response or no data returned.")
