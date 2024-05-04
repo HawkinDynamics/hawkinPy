@@ -2,9 +2,9 @@
 
 name: Publish to TestPyPI
 on:
-  workflow_run:
-    workflows: [Push and Test]
-    types: [completed]
+  push:
+    branches:
+      - dev_env
 
 jobs:
   # Job 1: Build the dist files
