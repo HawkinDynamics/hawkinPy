@@ -8,7 +8,7 @@ on:
       types:
         - completed
       branches: 
-        - dev
+        - dev_env
 
 jobs:
   # Job 1: Build the dist files
