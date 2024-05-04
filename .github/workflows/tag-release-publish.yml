@@ -1,9 +1,7 @@
 # This workflow will upload a Python Package using poetry when a release is created
 
 name: Publish to PyPI
-on:
-  release:
-    types: [published]
+on: workflow_dispatch
 
 permissions:
   contents: read
