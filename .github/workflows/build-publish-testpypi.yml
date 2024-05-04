@@ -46,11 +46,11 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: poetry install
 
-    - name: Update package version 
-      run: poetry version patch
-
     - name: Build package with poetry
       run: poetry build
+
+    - name: Update package version 
+      run: poetry version patch
 
     - name: Publish package to TestPyPI
       run: |
