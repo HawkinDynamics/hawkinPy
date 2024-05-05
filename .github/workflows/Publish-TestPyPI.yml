@@ -3,7 +3,7 @@
 name: Publish to TestPyPI
 on:
   workflow_run:
-    workflows: [Push and Test]
+    workflows: [Test Py Versions and OS]
     types:
       - completed
 
@@ -12,6 +12,7 @@ jobs:
   build-package:
     name: Build dist
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout Code
