@@ -4,8 +4,8 @@ name: Publish to TestPyPI
 on:
   workflow_run:
     workflows: [Test Py Versions and OS]
-    types:
-      - completed
+    types: [completed]
+    branches: [dev_env]
 
 jobs:
   # Job 1: Build the dist files
