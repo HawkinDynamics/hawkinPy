@@ -2,10 +2,10 @@
 Run at the beginning of script/session to set desired logging settings
 
 ```Python title="Log File for Debugging"
-from hdforce import LogConfig
+from hdforce import LoggerConfig
 
 # Configure to set up a log file for thorough debugging
-LogConfig(file = TRUE, level = 'debug')
+LoggerConfig.Configuration(file = TRUE, level = 'debug')
 ```
 ### Authentication
 

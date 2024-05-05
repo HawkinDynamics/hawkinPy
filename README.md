@@ -4,12 +4,11 @@
 
 <!-- badges: start -->
 ![GitHub Release](https://img.shields.io/github/v/release/HawkinDynamics/hawkinPy)
-[![Test Python Versions: 3.9<>3.12](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml/badge.svg?branch=dev_env)](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml)
-[![Test OS: Windows, Microsoft, Linux](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml/badge.svg?branch=dev_env)](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml)
+[![Test Py Versions and OS](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml/badge.svg?branch=dev_env)](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/HawkinDynamics/hawkinPy/dev_env)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![lifecycle](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
 ## How To Use The HDFORCE Package

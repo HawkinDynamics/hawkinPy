@@ -3,7 +3,7 @@
 Some configuration options were included with this package to help it adapt to your development and analysis needs. Whether it is your first time working with the hdforce package, or starting over with a new project, you can choose how you want to use the package and customize your experience.
 
 ### Event Logging
-HDFORCE allows for event logging. This gives more detailed understanding of function processes and errors, to make development and debugging more efficient. Using the `LogConfig` function, users can configure a couple of key settings to their project environment.
+HDFORCE allows for event logging. This gives more detailed understanding of function processes and errors, to make development and debugging more efficient. Using the `LoggerConfig.Configuration` function, users can configure a couple of key settings to their project environment.
 
 1. Choose if the logs should be streamed to the stdout (default) or if you want a log file created to store logs.
 2. Choose the minimum level of log to be output. This is default to 'warning'.

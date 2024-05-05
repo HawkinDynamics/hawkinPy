@@ -7,7 +7,7 @@ nav:
     - Example Usage: UserGuide/Examples.md
   - Function:
     - AuthManager: Functions/AuthManager.md
-    - LogConfig: Functions/LogConfig.md
+    - LoggerConfig: Functions/LoggerConfig.md
     - GetMetrics: Functions/GetMetrics.md
     - GetTypes: Functions/GetTypes.md
     - GetAthletes: Functions/GetAthletes.md

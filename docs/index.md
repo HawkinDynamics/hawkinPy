@@ -2,11 +2,12 @@
 **Get your data from the Hawkin Dynamics API**
 
 <!-- badges: start -->
-![Static Badge](https://img.shields.io/badge/hdforce_v0.0.1-beta-purple)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2024--04--24-yellowgreen.svg)](/commits/dev_man)
+![GitHub Release](https://img.shields.io/github/v/release/HawkinDynamics/hawkinPy)
+[![Test Py Versions and OS](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml/badge.svg?branch=dev_env)](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/HawkinDynamics/hawkinPy/dev_env)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![lifecycle](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
 ## The Force Is With You
@@ -23,7 +24,7 @@ The package was developed to be fairly straight-forward and easy to use. There a
 3. Get your data
 
 __Logging Configuration__
-For debugging and testing purposes, you have the option of creating a log file. The package has checkpoints within each function, that not only give descriptions of errors, but also give success checkpoints and details of call responses. By using the `LogConfig` function, you can set the minimum level of log type and whether to save the logs to a file. By default, logs are streamed to the console at the minimum level of 'info'.
+For debugging and testing purposes, you have the option of creating a log file. The package has checkpoints within each function, that not only give descriptions of errors, but also give success checkpoints and details of call responses. By using the `LoggerConfig.Configure` function, you can set the minimum level of log type and whether to save the logs to a file. By default, logs are streamed to the console at the minimum level of 'info'.
 
 __Authentication__
 Using the `AuthManager`, you can configure some authentication settings specific to your development environment and gain access to your server. Once your session begins, you can simply use any of the other functions to get any and all of the data you ned from your organization. 

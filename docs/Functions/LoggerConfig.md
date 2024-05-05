@@ -1,4 +1,4 @@
-__`LogConfig(file: bool = "False, level: str = "info", file_path: str=None, file_mode: str = 'a')`__
+__`LoggerConfig.Configuration(file: bool = "False, level: str = "info", file_path: str=None, file_mode: str = 'a')`__
 
 ### Description
 Configure logging for the application based on user preferences or defaults.
@@ -20,7 +20,7 @@ __`file_mode`__: (str) Mode to open the log file, default is 'a'. Options are 'a
 ### Example
 
 ``` Python title="Create Log File At Lowest Level"
-from hdforce import LogConfig
+from hdforce import LoggerConfig
 
-LogConfig(file = True, level = "debug")
+LoggerConfig.Configuration(file = True, level = "debug")
 ```
