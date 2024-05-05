@@ -2,13 +2,9 @@
 name: Publish Docs Page
 
 on:
-  pull_request_target:
-    types:
-      - closed
+  push:
     branches:
-      - 'main'
-    paths:
-      - '**.md'
+      - dev_env
 
 permissions:
   contents: write
