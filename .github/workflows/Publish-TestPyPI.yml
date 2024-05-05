@@ -4,7 +4,8 @@ name: Publish to TestPyPI
 on:
   workflow_run:
     workflows: [Push and Test]
-    types: [completed]
+    types:
+      - completed
 
 jobs:
   # Job 1: Build the dist files
