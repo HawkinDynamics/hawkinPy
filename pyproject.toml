@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hdforce"
-version= "1.0.0rc0"
+version= "0.0.0"
 description = "Get your data from the Hawkin Dynamics API"
 authors = ["laureng-hd <lauren@hawkindynamics.com>"]
 readme = "README.md"
