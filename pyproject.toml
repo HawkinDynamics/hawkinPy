@@ -31,11 +31,20 @@ flake8 = "^7.0.0"
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.4"
 
-
 [tool.poetry-dynamic-versioning]
 enable = true
+vcs = "git"
 bump = true
 tag-branch = "main"
+pattern  = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
+format-jinja = """
+    {%- if distance == 0 -%}
+        {{- base -}}
+    {%- else -%}
+        {{- base }}.dev{{ distance }}+g{{commit}}
+    {%- endif -%}
+"""
+
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
