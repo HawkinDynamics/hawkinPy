@@ -1,0 +1,25 @@
+# This workflow will upload a Python Package using poetry when a release is created
+
+name: Publish to PyPI
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  # Job 1: Build the dist files
+  build-package:
+    name: Build dist
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Build and publish to pypi
+      uses: JRubics/poetry-publish@v2.0
+      with:
+        pypi_token: ${{ secrets.PYPI_TOKEN }}
+        plugins: "poetry-dynamic-versioning[plugin]"

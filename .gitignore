@@ -50,6 +50,10 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+*.ipynb
+*.code-workspace
+.env
+
 
 # Translations
 *.mo

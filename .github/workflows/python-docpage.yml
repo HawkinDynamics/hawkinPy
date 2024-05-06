@@ -1,0 +1,42 @@
+# Create and publish docs website
+name: Publish Docs Page
+
+on:
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - 'main'
+    paths:
+      - '**.md'
+
+permissions:
+  contents: write
+
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v5
+      id: setuppython
+      with:
+        python-version: '3.x'
+
+    - name:
+      uses: actions/cache@v4
+      with:
+        key: ${{ github.ref }}
+        path: .cache
+
+    - name: install mkdocs
+      run:
+        pip install mkdocs
+        pip install mkdocs-material
+
+    - name: deploy-page
+      run: mkdocs gh-deploy --force
