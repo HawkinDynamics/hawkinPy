@@ -3,9 +3,9 @@
 **Get your data from the Hawkin Dynamics API**
 
 <!-- badges: start -->
-![GitHub Release](https://img.shields.io/github/v/release/HawkinDynamics/hawkinPy)
-[![Test Py Versions and OS](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml/badge.svg?branch=dev_env)](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml)
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/HawkinDynamics/hawkinPy/dev_env)
+![Static Badge](https://img.shields.io/badge/release-v1.0.1-blue)
+![Static Badge](https://img.shields.io/badge/OS_and_Py_Version_Tests-pass-success)
+![Static Badge](https://img.shields.io/badge/last_commit-2024--05--06-blue)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![lifecycle](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)
@@ -16,7 +16,7 @@
 HDFORCE provides simple functionality with Hawkin Dynamics API. These functions are for use with ‘Hawkin Dynamics Beta API’ version 1.10-beta. You must be a Hawkin Dynamics user with an active integration account to utilize functions within the package.
 
 ## Functions
-This API is designed to get data out of your Hawkin Dynamics server and interact with your data more intimately. It is not designed to be accessed from client applications directly. There is a limit on the amount of data that can be returned in a single request (256 MB). As your database grows, it will be necessary to use the `from` and `to` parameters to limit the size of the responses. Responses that exceed the memory limit will timeout and fail. It is advised that you design your client to handle this from the beginning. A recommended pattern would be to have two methods of fetching data. A scheduled pull that uses the `from` and `to` parameters to constrain the returned data to only tests that have occurred since the last fetch e.g. every day or every 5 minutes. And then a pull that fetches the entire database since you began testing that is only executed when necessary. A recommended way of doing this is to generate the `from` and `to` parameters for each month since you started and send a request for each either in parallel or sequentially.
+This API is designed to get data out of your Hawkin Dynamics server and interact with your data more intimately. It is not designed to be accessed from client applications directly. There is a limit on the amount of data that can be returned in a single request (256 MB). As your database grows, it will be necessary to use the `from_` and `to_` parameters to limit the size of the responses. Responses that exceed the memory limit will timeout and fail. It is advised that you design your client to handle this from the beginning. A recommended pattern would be to have two methods of fetching data. A scheduled pull that uses the `from_` and `to_` parameters to constrain the returned data to only tests that have occurred since the last fetch e.g. every day or every 5 minutes. And then a pull that fetches the entire database since you began testing that is only executed when necessary. A recommended way of doing this is to generate the `from_` and `to_` parameters for each month since you started and send a request for each either in parallel or sequentially.
 
 This package was meant to help execute requests to the Hawkin Dynamics API with a single line of code. There are 13 functions to help execute 4 primary objectives:
 

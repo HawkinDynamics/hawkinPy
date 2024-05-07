@@ -1,15 +1,15 @@
 [tool.poetry]
 name = "hdforce"
-version= "0.0.0"
+version= "1.0.1"
 description = "Get your data from the Hawkin Dynamics API"
 authors = ["laureng-hd <lauren@hawkindynamics.com>"]
 readme = "README.md"
 keywords = ["hawkin", "force plates", "sports science"]
 homepage = "https://www.hawkindynamics.com/"
 repository = "https://github.com/HawkinDynamics/hawkinPy"
-documentation = "https://silver-adventure-22j19qq.pages.github.io/"
+documentation = "https://hawkindynamics.github.io/hawkinPy/"
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "Topic :: Software Development :: Build Tools",
   "License :: OSI Approved :: MIT License",
@@ -31,20 +31,7 @@ flake8 = "^7.0.0"
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.4"
 
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-bump = true
-tag-branch = "main"
-pattern  = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
-format-jinja = """
-    {%- if distance == 0 -%}
-        {{- base -}}
-    {%- else -%}
-        {{- base }}.dev{{ distance }}+g{{commit}}
-    {%- endif -%}
-"""
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

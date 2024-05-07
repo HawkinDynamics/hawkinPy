@@ -1,5 +1,4 @@
-<img src="img/HDBlackHorizontal.png" align="center" alt="HD Logo"/>
-
+![HDlogo](../img/HDBlack_Horizontal.png)
 ## Package Development
 
 #### Authors
