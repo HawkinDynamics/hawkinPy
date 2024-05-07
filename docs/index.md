@@ -2,9 +2,9 @@
 **Get your data from the Hawkin Dynamics API**
 
 <!-- badges: start -->
-![GitHub Release](https://img.shields.io/github/v/release/HawkinDynamics/hawkinPy)
-[![Test Py Versions and OS](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml/badge.svg?branch=dev_env)](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml)
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/HawkinDynamics/hawkinPy/dev_env)
+![Static Badge](https://img.shields.io/badge/release-v1.0.01-blue?link=https%3A%2F%2Fsilver-adventure-22j19qq.pages.github.io%2F)
+![Static Badge](https://img.shields.io/badge/OS_and_Py_Version_Tests-pass-success)
+![Static Badge](https://img.shields.io/badge/last_commit-2024--05--06-blue)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![lifecycle](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)
