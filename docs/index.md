@@ -2,7 +2,7 @@
 **Get your data from the Hawkin Dynamics API**
 
 <!-- badges: start -->
-![Static Badge](https://img.shields.io/badge/release-v1.0.01-blue?link=https%3A%2F%2Fsilver-adventure-22j19qq.pages.github.io%2F)
+![Static Badge](https://img.shields.io/badge/release-v1.0.1-blue)
 ![Static Badge](https://img.shields.io/badge/OS_and_Py_Version_Tests-pass-success)
 ![Static Badge](https://img.shields.io/badge/last_commit-2024--05--06-blue)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
