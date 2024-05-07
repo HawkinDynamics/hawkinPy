@@ -2,9 +2,8 @@
 name: Publish Docs Page
 
 on:
-  push:
-    branches:
-      - dev_env
+  release:
+    types: [published]
 
 permissions:
   contents: write
