@@ -43,13 +43,10 @@ def GetForceTime(testId: str) -> pd.DataFrame:
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
     tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-    logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # get current time in timestamp
     now = datetime.datetime.now()
     nowtime = datetime.datetime.timestamp(now)
-    if nowtime < tokenExp:
-        logger.debug(f"Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Validate refresh token and expiration
     if a_token is None:
@@ -84,7 +81,7 @@ def GetForceTime(testId: str) -> pd.DataFrame:
             logger.error("Failed to authenticate. Try AuthManager")
             raise Exception("Failed to authenticate. Try AuthManage")
     else:
-        logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
+        logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # API Cloud URL
     url_cloud = os.getenv("CLOUD_URL")
@@ -100,9 +97,9 @@ def GetForceTime(testId: str) -> pd.DataFrame:
     url = f"{url_cloud}/forcetime/{tid}"
 
     # GET Request
+    logger.debug(f"GET Force-Time data for test: {tid}")
     headers = {"Authorization": f"Bearer {a_token}"}
     response = requests.get(url, headers=headers)
-    logger.debug(f"GET Force-Time data for test: {tid}")
 
     # Check response status and handle data accordingly
     if response.status_code != 200:

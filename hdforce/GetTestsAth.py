@@ -51,13 +51,10 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
     tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-    logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # get current time in timestamp
     now = datetime.datetime.now()
     nowtime = datetime.datetime.timestamp(now)
-    if nowtime < tokenExp:
-        logger.debug(f"Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Validate refresh token and expiration
     if a_token is None:
@@ -92,7 +89,7 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
             logger.error("Failed to authenticate. Try AuthManager")
             raise Exception("Failed to authenticate. Try AuthManage")
     else:
-        logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
+        logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # API Cloud URL
     url_cloud = os.getenv("CLOUD_URL")
@@ -123,9 +120,6 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
     # Create URL for request
     url = f"{url_cloud}?athleteId={a_id}{from_dt}{to_dt}"
 
-    # GET Request
-    headers = {"Authorization": f"Bearer {a_token}"}
-    response = requests.get(url, headers=headers)
     # Log request
     if from_dt is not None and to_dt is not None:
         logger.debug(f"Athlete Test Request from_dt to_dt")
@@ -133,6 +127,9 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
         logger.debug(f"Athlete Test Request to_dt")
     elif to_dt is None:
         logger.debug(f"Athlete Test Request from_dt")
+    # GET Request
+    headers = {"Authorization": f"Bearer {a_token}"}
+    response = requests.get(url, headers=headers)
 
     # Check response status and handle data accordingly
     if response.status_code != 200:
