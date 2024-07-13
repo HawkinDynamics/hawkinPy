@@ -1,5 +1,10 @@
 # Changelogs
 
+## hdforce v1.0.2
+
+* Additions of CreateAthlete and UpdateAthlete functions
+* Expansion of GetTests function with deprecation of GetTests... variations
+
 ## hdforce v1.0.01
 
 * Initial release of production package

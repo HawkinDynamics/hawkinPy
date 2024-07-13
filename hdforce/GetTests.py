@@ -11,7 +11,7 @@ from .AuthManager import AuthManager
 # Get All Tests
 
 
-def GetTests(from_=None, to_=None, sync=False, active=True) -> pd.DataFrame:
+def GetTests(from_=None, to_=None, sync=False, athleteId=None, typeId=None, teamId=None, groupId=None, includeInactive = False) -> pd.DataFrame:
     """Get all test trials from an account. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
 
     Parameters
@@ -25,7 +25,19 @@ def GetTests(from_=None, to_=None, sync=False, active=True) -> pd.DataFrame:
     sync : bool, optional
         If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
-    active : bool, optional
+    athleteId : str optional
+        The unique identifier of the athlete whose tests are to be retrieved.
+
+    typeId : str optional
+        The canonical test ID, test type name, or test name abbreviation. Must correspond to known test types.
+
+    teamId : str optional
+        A single team ID, tuple or list of team IDs to receive tests from specific teams.
+
+    groupId : str optional
+        A single group ID or a comma-separated string of group IDs to receive tests from specific groups.
+
+    includeInactive : bool, optional
         If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
 
     Returns
@@ -86,39 +98,94 @@ def GetTests(from_=None, to_=None, sync=False, active=True) -> pd.DataFrame:
     else:
         logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
-    # API Cloud URL
-    url_cloud = os.getenv("CLOUD_URL")
-
-    # From DateTime
-    from_dt = ""
-    if from_ is not None:
-        if sync:
-            from_dt = f"?syncFrom={from_}"
-        else:
-            from_dt = f"?from={from_}"
-
-    # To DateTime
-    to_dt = ""
-    if to_ is not None:
-        if from_ is None:
-            to_dt = f"?{'syncTo' if sync else 'to'}={to_}"
-        else:
-            to_dt = f"&{'syncTo' if sync else 'to'}={to_}"
-
     # Create URL for request
-    url = f"{url_cloud}{from_dt}{to_dt}"
+    url = os.getenv("CLOUD_URL")
 
+    # Create blank Query list to handle parameters
+    query = {}
+
+    # Check if more than one of the specified parameters is provided
+    provided_params = [athleteId, typeId, teamId, groupId]
+    provided_count = sum(1 for param in provided_params if param is not None)
+    # Error if more than one key parameter provided
+    if provided_count > 1:
+        raise ValueError("Only one of athleteId, typeId, teamId, or groupId can be provided at the same time.")
+
+    # Evaluate from and to dates for Sync command
+    if sync is True:
+        if from_ is not None:
+            query['syncFrom'] = from_
+        if to_ is not None:
+            query['syncTo'] = to_
+    elif sync is False:
+        if from_ is not None:
+            query['from'] = from_
+        if to_ is not None:
+            query['to'] = to_
+
+    # Evaluate for Athlete argument
+    if athleteId is not None:
+        query['athleteId'] = athleteId
+
+    # Evaluate for Test Type argument
+    if typeId is not None:
+        # Check typeId
+        type_ids = {
+            "7nNduHeM5zETPjHxvm7s": ["7nNduHeM5zETPjHxvm7s", "Countermovement Jump", "CMJ"],
+            "QEG7m7DhYsD6BrcQ8pic": ["QEG7m7DhYsD6BrcQ8pic", "Squat Jump", "SJ"],
+            "2uS5XD5kXmWgIZ5HhQ3A": ["2uS5XD5kXmWgIZ5HhQ3A", "Isometric Test", "ISO"],
+            "gyBETpRXpdr63Ab2E0V8": ["gyBETpRXpdr63Ab2E0V8", "Drop Jump", "DJ"],
+            "5pRSUQVSJVnxijpPMck3": ["5pRSUQVSJVnxijpPMck3", "Free Run", "FREE"],
+            "pqgf2TPUOQOQs6r0HQWb": ["pqgf2TPUOQOQs6r0HQWb", "CMJ Rebound", "CMJR"],
+            "r4fhrkPdYlLxYQxEeM78": ["r4fhrkPdYlLxYQxEeM78", "Multi Rebound", "MR"],
+            "ubeWMPN1lJFbuQbAM97s": ["ubeWMPN1lJFbuQbAM97s", "Weigh In", "WI"],
+            "rKgI4y3ItTAzUekTUpvR": ["rKgI4y3ItTAzUekTUpvR", "Drop Landing", "DL"]
+        }
+        # Sort test type Id
+        for key, values in type_ids.items():
+            if typeId in values:
+                t_id = key
+                break
+        else:
+            logger.error("typeId incorrect. Check your entry")
+            raise Exception("typeId incorrect. Check your entry")
+
+        # Add Test Type Id to params query
+        query['testTypeId'] = t_id
+
+    # Evaluate for Team Id argument
+    if teamId is not None:
+        # Handling teamId input whether single ID or tuple of IDs
+        if isinstance(teamId, (tuple, list)):
+            query['teamId']  = ','.join(map(str, teamId))  # Join multiple team IDs into a comma-separated string
+        elif isinstance(teamId, str):
+            query['teamId'] = teamId  # Use the single team ID as is
+        else:
+            logger.error("teamId must be a string or a tuple/list of strings.")
+            raise ValueError("teamId must be a string or a tuple/list of strings.")
+
+
+    # Evaluate for Group Id argument
+    if groupId is not None:
+        # Handling groupId input whether single ID or tuple of IDs
+        if isinstance(groupId, (tuple, list)):
+            query['groupId']  = ','.join(map(str, groupId))  # Join multiple team IDs into a comma-separated string
+        elif isinstance(groupId, str):
+            query['groupId'] = groupId  # Use the single team ID as is
+        else:
+            logger.error("groupId must be a string or a tuple/list of strings.")
+            raise ValueError("groupId must be a string or a tuple/list of strings.")
 
     # Log request
-    if from_dt is not None and to_dt is not None:
+    if from_ is not None and to_ is not None:
         logger.debug(f"Test Request from_dt to_dt")
-    elif from_dt is None:
+    elif from_ is None:
         logger.debug(f"Test Request to_dt")
-    elif to_dt is None:
+    elif to_ is None:
         logger.debug(f"Test Request from_dt")
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params=query)
 
     # Check response status and handle data accordingly
     if response.status_code != 200:
@@ -136,10 +203,30 @@ def GetTests(from_=None, to_=None, sync=False, active=True) -> pd.DataFrame:
         df = responseHandler(data) 
 
         # Filter active tests if required
-        if 'active' in df.columns and active:
+        if 'active' in df.columns and includeInactive == False:
             df = df[df['active'] == True]
 
         # Setting attributes
+        # Create Test Type info for df attrs
+        if typeId:
+            if t_id in type_ids:
+                type_info = type_ids[t_id]
+
+        # Create team info for df attrs
+        if teamId:
+            df.attrs['Team Id'] = teamId
+
+        # Create group info for df attrs
+        if groupId:
+            df.attrs['Group Id'] = groupId
+
+        # Athlete Real Name
+        if athleteId:
+            aName = df['athlete_name'].unique()
+            aName = str(aName[0])
+            df.attrs['Athlete Id'] = athleteId
+            df.attrs['Athlete Name'] = aName
+        
         df.attrs['Last Sync'] = int(data['lastSyncTime'])
         df.attrs['Last Test Time'] = int(data['lastTestTime'])
         df.attrs['Count'] = int(data['count'])

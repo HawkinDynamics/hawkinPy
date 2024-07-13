@@ -2,7 +2,7 @@
 **Get your data from the Hawkin Dynamics API**
 
 <!-- badges: start -->
-![Static Badge](https://img.shields.io/badge/release-v1.0.1-blue)
+![Static Badge](https://img.shields.io/badge/release-v1.0.2-blue)
 ![Static Badge](https://img.shields.io/badge/OS_and_Py_Version_Tests-pass-success)
 ![Static Badge](https://img.shields.io/badge/last_commit-2024--05--06-blue)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
@@ -30,4 +30,9 @@ __Authentication__
 Using the `AuthManager`, you can configure some authentication settings specific to your development environment and gain access to your server. Once your session begins, you can simply use any of the other functions to get any and all of the data you ned from your organization. 
 
 __Getting Your Data__
+
+> As of July 10, 2024, `GetTestsAth`, `GetTestsType`, `GetTestsTeam`, and `GetTestsGroup` 
+> have been deprecated for the preferred use of `GetTests`. This function will be fully 
+> superseded Jan 01, 2025 12:00:00.
+
 The API is not designed to be accessed from client applications directly. There is a limit on the amount of data that can be returned in a single request (256mb). As your database grows, it will be necessary to use the `from_` and `to_` parameters to limit the size of the responses. Responses that exceed the memory limit will timeout and fail. It is advised that you design your client to handle this from the beginning. A recommended pattern would be to have two methods of fetching data. A scheduled pull that uses the `from_` and `to_` parameters to constrain the returned data to only tests that have occurred since the last fetch e.g. every day or every 5 minutes. And then a pull that fetches the entire database since you began testing that is only executed when necessary. A recommended way of doing this is to generate the `from_` and `to_` parameters for each month since you started and send a request for each either in parallel or sequentially.

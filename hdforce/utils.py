@@ -304,3 +304,29 @@ def responseHandler(json_data):
     df.columns = [col.replace('athlete_external_', 'external_') for col in df.columns]
 
     return df
+
+
+# -------------------- #
+# Deprecation Decorator
+
+import warnings
+import functools
+
+def deprecated(reason):
+    """
+    Decorator to mark functions as deprecated.
+    
+    Args:
+        reason (str): The reason why the function is deprecated and what to use instead.
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            warnings.warn(
+                f"Function {func.__name__} is deprecated: {reason}",
+                category=DeprecationWarning,
+                stacklevel=2
+            )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator

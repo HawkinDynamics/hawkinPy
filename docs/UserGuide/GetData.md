@@ -31,7 +31,11 @@ parameter. This parameter is best suited for bulk exports of historical data
 
 #### Get Test Function
 
-* `GetTests()` - Get the tests for your account. You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). The Response will be a data frame containing the trials within the time range (if specified).
+> As of July 10, 2024, `GetTestsAth`, `GetTestsType`, `GetTestsTeam`, and `GetTestsGroup` 
+> have been deprecated for the preferred use of `GetTests`. This function will be fully 
+> superseded Jan 01, 2025 12:00:00.
+
+* `GetTests()` - The primary function to call tests is `get_tests`. This is a base request for tests that, as of 2024-07-10, accepts all arguments : 'from', 'to', 'sync', 'active', 'athleteId', 'testTypeId', 'teamId', and 'groupId'. Using this function, you have complete control of the tests being requested from the cloud. It is important to understand that requests can **NOT** include any combination of 'athleteId', 'testTypeId', 'teamId', or 'groupId'. This will result in and error. Any of these arguments **CAN** be used with 'from', 'to', 'active', and 'sync'.
 * `GetTestsAth()` - Get only tests of the specified athlete from your organization. You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from the athlete, within the time range (if specified).
 * `GetTestsType()` - Get only tests of the specified test type from your organization. You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from that test type, within the time range (if specified).
 * `GetTestsTeam()` - Get only tests of the specified teams from your organization. Requires a `teamId` argument, which expects a text string, list or tuple (max of 10 teams). You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from those teams, within the time range (if specified).

@@ -2,37 +2,32 @@
 import requests
 import os
 import datetime
-import pandas as pd
+from typing import List, Dict, Optional
+from pydantic import BaseModel
 # Package imports
 from .AuthManager import AuthManager
 from .utils import ConfigManager
 from .LoggerConfig import LoggerConfig
+from .Classes import NewAthlete, AthleteResult
 
 # Get a logger specific to this module
 logger = LoggerConfig.get_logger(__name__)
 
 # -------------------- #
-# Get Athletes
+# Create Athletes
 
-
-def GetAthletes(includeInactive: bool = False) -> pd.DataFrame:
-    """Get the athlete information from an account.
+def CreateAthletes(athletes: List[NewAthlete]) -> List[AthleteResult]:
+    """Create athletes for your account. Up to 500 at one time.
 
     Parameters
     ----------
-    includeInactive : bool, optional
-        A boolean that specifies whether to include inactive athletes in the results. Default is False, meaning by default inactive athletes are not included.
+    athletes : list[Athlete]
+        A list of Athletes with class of `NewAthlete`.
 
     Returns
     -------
-    pd.DataFrame
-        A Pandas DataFrame containing the athletes' information, with columns:
-        - id: Athlete's unique identifier.
-        - names: Athlete's given full name.
-        - teams: A nested list of athlete's team ids as strings.
-        - groups: A nested list of athlete's group ids as strings.
-        - active: Boolean indicating if the athlete's profile is active (not archived).
-        - external: Columns dynamically created for each external attribute associated with the athletes. (example = external.ExternalId: value)
+    list[AthleteResult]
+        A list of AthleteResult objects indicating the success or failure of each athlete creation.
 
     Raises
     ------
@@ -85,38 +80,51 @@ def GetAthletes(includeInactive: bool = False) -> pd.DataFrame:
     # API Cloud URL
     url_cloud = os.getenv("CLOUD_URL")
 
-    # Create URL for request
-    url = f"{url_cloud}/athletes?inactive={includeInactive}"
-
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
 
-    # Create Response
-    if includeInactive:
-        logger.debug("GET Request: Athletes (inactive = true)")
-    else:
-        logger.debug("GET Request: Athletes (inactive = false)")
+    # Determine URL and payload based on the number of athletes
+    url = f"{url_cloud}/athletes/bulk"
+    payload = [athlete.model_dump() for athlete in athletes]
+
+    # Log the payload being sent
+    logger.debug(f"Payload being sent to API: {payload}")
+
     # GET Request
-    response = requests.get(url, headers=headers)
+    response = requests.post(url, headers=headers, json=payload)
 
     # Response Handling
-    # If Error show error
     if response.status_code != 200:
         logger.error(f"Error {response.status_code}: {response.reason}")
         raise Exception(f"Error {response.status_code}: {response.reason}")
 
-    # If successful
     try:
-        data = response.json()['data']
-        df = pd.json_normalize(data, meta=['count'], errors='ignore')
+        response_data = response.json()
+        data = response_data.get('data', [])
+        failures = response_data.get('failures', [])
 
-        # Setting attributes
-        df.attrs['Count'] = int(len(df.index))
-        count = str(len(df.index))
-        logger.info(f"Request successful. Athletes returned: {count}")
-        return df
+        # Successful athlete names
+        successful_names = [athlete['name'] for athlete in data]
 
-    # Bad parse or none returned
+        # Process failures into a dictionary of reason to list of names
+        failure_reasons = {}
+        for failure in failures:
+            reason = failure['reason']
+            name = failure['data'].get('name')
+            if reason in failure_reasons:
+                failure_reasons[reason].append(name)
+            else:
+                failure_reasons[reason] = [name]
+
+        # Log the successful athletes count
+        successful_count = len(successful_names)
+        logger.info(f"Request successful. Athletes created: {successful_count}")
+
+        return {
+            "successful": successful_names,
+            "failures": failure_reasons
+        }
+
     except ValueError:
-        logger.error("Failed to parse JSON response or no data returned.")
-        raise Exception("Failed to parse JSON response or no data returned.")
+        logger.error("Failed to parse response JSON")
+        raise Exception("Failed to parse response JSON")

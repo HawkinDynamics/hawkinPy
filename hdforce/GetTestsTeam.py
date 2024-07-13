@@ -4,14 +4,16 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, ConfigManager
+from .utils import responseHandler, logger, ConfigManager, deprecated
 from .AuthManager import AuthManager
-
+# Enable deprecation warnings globally
+import warnings
+warnings.simplefilter('always', DeprecationWarning)
 # -------------------- #
 # Tests by Team
 
-
-def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
+@deprecated('Use `GetTests` instead, which has been expanded to handle all requests.')
+def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = False, includeInactive: bool = False) -> pd.DataFrame:
     """Get test trials for specified team(s). Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
 
     Parameters
@@ -28,8 +30,8 @@ def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = F
     sync : bool, optional
         If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
-    active : bool, optional
-        If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
+    includeInactive : bool, optional
+        If False, only active tests are fetched. If True, all tests including inactive ones are fetched. Default is False.
 
     Returns
     -------
@@ -46,6 +48,10 @@ def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = F
         If the HTTP response status is not 200, indicating an unsuccessful API request, or if there is a failure in parsing the JSON response.
     ValueError
         If the 'teamId' parameter is not properly formatted as a string or a list/tuple of strings.
+    
+    Deprecated
+    ----------
+    Use `GetTests` instead, which has been expanded to handle all requests.
     """
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
@@ -91,36 +97,43 @@ def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = F
         logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # API Cloud URL
-    url_cloud = os.getenv("CLOUD_URL")
+    url = os.getenv("CLOUD_URL")
 
-    # From datetime
-    from_dt = f"&syncFrom={from_}" if from_ is not None and sync else f"&from={from_}" if from_ is not None else ""
-
-    # To datetime
-    to_dt = f"&syncTo={to_}" if to_ is not None and sync else f"&to={to_}" if to_ is not None else ""
+    # Create blank Query list to handle parameters
+    query = {}
 
     # Handling teamId input whether single ID or tuple of IDs
     if isinstance(teamId, (tuple, list)):
-        t_id = ','.join(map(str, teamId))  # Join multiple team IDs into a comma-separated string
+        query['teamId']  = ','.join(map(str, teamId))  # Join multiple team IDs into a comma-separated string
     elif isinstance(teamId, str):
-        t_id = teamId  # Use the single team ID as is
+        query['teamId'] = teamId  # Use the single team ID as is
     else:
         logger.error("teamId must be a string or a tuple/list of strings.")
         raise ValueError("teamId must be a string or a tuple/list of strings.")
 
-    # Create URL for request
-    url = f"{url_cloud}?teamId={t_id}{from_dt}{to_dt}"
+    # Evaluate from and to dates for Sync command
+    if sync is True:
+        if from_ is not None:
+            query['syncFrom'] = from_
+        if to_ is not None:
+            query['syncTo'] = to_
+    elif sync is False:
+        if from_ is not None:
+            query['from'] = from_
+        if to_ is not None:
+            query['to'] = to_
 
     # Log request
-    if from_dt is not None and to_dt is not None:
+    if from_ is not None and to_ is not None:
         logger.debug(f"Team Test Request from_dt to_dt")
-    elif from_dt is None:
+    elif from_ is None:
         logger.debug(f"Team Test Request to_dt")
-    elif to_dt is None:
+    elif to_ is None:
         logger.debug(f"Team Test Request from_dt")
+    
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params=query)
 
     # Check response status and handle data accordingly
     if response.status_code != 200:
@@ -138,7 +151,7 @@ def GetTestsTeam(teamId: str, from_: int = None, to_: int = None, sync: bool = F
         df = responseHandler(data)
 
         # Filter active tests if required
-        if 'active' in df.columns and active:
+        if 'active' in df.columns and includeInactive == False:
             df = df[df['active'] == True]
 
         # Setting attributes

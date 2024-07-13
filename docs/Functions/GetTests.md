@@ -1,4 +1,4 @@
-__`GetTests(from_: int = None, to_: int = None, sync: bool = False, active: bool = True)`__
+__`GetTests(from_: int = None, to_: int = None, sync: bool = False, athleteId: str = None, typeId: str = None, teamId: str = None,groupId: str = None, includeInactive: bool = False)`__
 
 ### Description
 Get all test trials from an account. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
@@ -10,7 +10,15 @@ __`to_`__: _(int)_ Unix timestamp specifying the end time until which tests shou
 
 __`sync`__: _(bool)_ If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
-__`active`__: _(bool)_ If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
+__`athleteId`__: _(str)_ The unique identifier of the athlete whose tests are to be retrieved.
+
+__`typeId`__: _(str)_ The canonical test ID, test type name, or test name abbreviation. Must correspond to known test types.
+
+__`teamId`__: _(str)_ A single team ID, tuple or list of team IDs to receive tests from specific teams.
+
+__`groupId`__: _(str)_ A single group ID, tuple or list of group IDs to receive tests from specific groups.
+
+__`includeInactive`__: _(bool)_ If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
 
 ### Returns
 A Pandas DataFrame containing details of the test trial, with columns:
