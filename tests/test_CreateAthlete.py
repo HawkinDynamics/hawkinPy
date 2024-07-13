@@ -3,16 +3,7 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime
 from hdforce.AuthManager import AuthManager
 from hdforce.CreateAthletes import CreateAthletes
-from hdforce.Classes import NewAthlete
-from typing import Optional
-from pydantic import BaseModel
-
-# Define AthleteResult Class in the test file
-class AthleteResult(BaseModel):
-    name: str
-    successful: bool
-    id: Optional[str] = None
-    reason: Optional[str] = None
+from hdforce.Classes import NewAthlete, AthleteResult
 
 # Mocked response generator for successful athlete creation
 def mock_success_response(formatted_time):

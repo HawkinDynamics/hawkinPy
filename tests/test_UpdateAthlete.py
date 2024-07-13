@@ -4,8 +4,6 @@ from datetime import datetime
 from hdforce.AuthManager import AuthManager
 from hdforce.UpdateAthletes import UpdateAthletes
 from hdforce.Classes import Athlete, AthleteResult
-from typing import Optional
-from pydantic import BaseModel
 
 # Mocked response generator for successful athlete update
 def mock_success_response(formatted_time):
