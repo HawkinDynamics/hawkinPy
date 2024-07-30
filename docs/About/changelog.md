@@ -1,5 +1,9 @@
 # Changelogs
 
+## hdforce v1.1.1
+
+* Corrected versioning and documentation
+
 ## hdforce v1.1.0
 
 * Additions of CreateAthlete and UpdateAthlete functions

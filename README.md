@@ -1,4 +1,4 @@
-# HDFORCE v1.1.0 <img src="docs/img/hdlogo_sm.png" align="right" alt="" width="120" />
+# HDFORCE v1.1.1 <img src="docs/img/hdlogo_sm.png" align="right" alt="" width="120" />
 
 **Get your data from the Hawkin Dynamics API**
 
