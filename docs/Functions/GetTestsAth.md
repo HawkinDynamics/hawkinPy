@@ -15,7 +15,7 @@ __`to_`__: _(int)_ Unix timestamp specifying the end time until which tests shou
 
 __`sync`__: _(bool)_ If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
-__`includeInactive`__: _(bool)_ If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
+__`includeInactive`__: _(bool)_ Default to False, where only active tests are returned. If True, all tests including inactive ones are returned.
 
 ### Returns
 A Pandas DataFrame containing details of the test trial, with columns:

@@ -32,7 +32,7 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
         If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
     includeInactive : bool, optional
-        If False, only active tests are fetched. If True, all tests including inactive ones are fetched. Default is False.
+        Default to False, where only active tests are returned. If True, all tests including inactive ones are returned.
 
     Returns
     -------

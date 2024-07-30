@@ -18,7 +18,7 @@ __`teamId`__: _(str)_ A single team ID, tuple or list of team IDs to receive tes
 
 __`groupId`__: _(str)_ A single group ID, tuple or list of group IDs to receive tests from specific groups.
 
-__`includeInactive`__: _(bool)_ If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
+__`includeInactive`__: _(bool)_ Default to False, where only active tests are returned. If True, all tests including inactive ones are returned.
 
 ### Returns
 A Pandas DataFrame containing details of the test trial, with columns:

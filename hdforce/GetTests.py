@@ -38,7 +38,7 @@ def GetTests(from_=None, to_=None, sync=False, athleteId=None, typeId=None, team
         A single group ID or a comma-separated string of group IDs to receive tests from specific groups.
 
     includeInactive : bool, optional
-        If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
+        Default to False, where only active tests are returned. If True, all tests including inactive ones are returned.
 
     Returns
     -------

@@ -1,9 +1,10 @@
 # Changelogs
 
-## hdforce v1.0.2
+## hdforce v1.1.0
 
 * Additions of CreateAthlete and UpdateAthlete functions
-* Expansion of GetTests function with deprecation of GetTests... variations
+* Expansion of GetTests function to include 'team', 'group', type', and 'athlete' arguments
+* Deprecation of GetTestsAth, GetTestsType, GetTestsTeam, and GetTestsGroup
 
 ## hdforce v1.0.01
 
