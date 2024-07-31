@@ -1,11 +1,11 @@
-# HDFORCE <img src="docs/img/hdlogo_sm.png" align="right" alt="" width="120" />
+# HDFORCE v1.1.1 <img src="docs/img/hdlogo_sm.png" align="right" alt="" width="120" />
 
 **Get your data from the Hawkin Dynamics API**
 
 <!-- badges: start -->
-![Static Badge](https://img.shields.io/badge/release-v1.0.1-blue)
+![Static Badge](https://img.shields.io/badge/release-v1.1.0-blue)
 ![Static Badge](https://img.shields.io/badge/OS_and_Py_Version_Tests-pass-success)
-![Static Badge](https://img.shields.io/badge/last_commit-2024--05--06-blue)
+![Static Badge](https://img.shields.io/badge/last_commit-2024--07--30-blue)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![lifecycle](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)

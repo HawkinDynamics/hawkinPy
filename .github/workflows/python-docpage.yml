@@ -2,16 +2,18 @@
 name: Publish Docs Page
 
 on:
-  release:
-    types: [published]
+  pull_request:
+    branches:
+      - main
+    types: [closed]
 
 permissions:
   contents: write
 
 jobs:
-
   deploy:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -22,16 +24,16 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name:
+    - name: Cache dependencies
       uses: actions/cache@v4
       with:
         key: ${{ github.ref }}
         path: .cache
 
-    - name: install mkdocs
-      run:
+    - name: Install mkdocs
+      run: |
         pip install mkdocs
         pip install mkdocs-material
 
-    - name: deploy-page
+    - name: Deploy page
       run: mkdocs gh-deploy --force
