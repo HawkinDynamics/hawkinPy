@@ -29,17 +29,16 @@ print(testTypes)
 
 _output_
 
-| id                   | name               |
-|----------------------|--------------------|
+| id                   | name                 |
+|----------------------|----------------------|
 | 7nNduHeM5zETPjHxvm7s | Countermovement Jump |
-| QEG7m7DhYsD6BrcQ8pic | Squat Jump          |
-| 2uS5XD5kXmWgIZ5HhQ3A | Isometric Test      |
-| gyBETpRXpdr63Ab2E0V8 | Drop Jump           |
-| 5pRSUQVSJVnxijpPMck3 | Free Run            |
-| pqgf2TPUOQOQs6r0HQWb | CMJ Rebound         |
-| r4fhrkPdYlLxYQxEeM78 | Multi Rebound       |
-| ubeWMPN1lJFbuQbAM97s | Weigh In            |
-| rKgI4y3ItTAzUekTUpvR | Drop Landing        |
-
-
-
+| QEG7m7DhYsD6BrcQ8pic | Squat Jump           |
+| 2uS5XD5kXmWgIZ5HhQ3A | Isometric Test       |
+| gyBETpRXpdr63Ab2E0V8 | Drop Jump            |
+| 5pRSUQVSJVnxijpPMck3 | Free Run             |
+| pqgf2TPUOQOQs6r0HQWb | CMJ Rebound          |
+| r4fhrkPdYlLxYQxEeM78 | Multi Rebound        |
+| ubeWMPN1lJFbuQbAM97s | Weigh In             |
+| rKgI4y3ItTAzUekTUpvR | Drop Landing         |
+| 4KlQgKmBxbOY6uKTLDFL | TS Free Run          |
+| umnEZPgi6zaxuw0KhUpM | TS Isometric Test    |

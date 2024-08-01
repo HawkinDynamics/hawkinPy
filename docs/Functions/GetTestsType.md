@@ -19,6 +19,8 @@ The typeId has been created to be more user friendly, as it accepts any of canon
 | r4fhrkPdYlLxYQxEeM78 | Multi Rebound | MR |
 | ubeWMPN1lJFbuQbAM97s | Weigh In | WI |
 | rKgI4y3ItTAzUekTUpvR | Drop Landing | DL |
+| 4KlQgKmBxbOY6uKTLDFL | TS Free Run | TSFR |
+| umnEZPgi6zaxuw0KhUpM | TS Isometric Test | TSISO |
 
 ### Parameters
 __`typeId`__: _(str)_ The canonical test ID, test type name, or test name abbreviation. Must correspond to known test types.

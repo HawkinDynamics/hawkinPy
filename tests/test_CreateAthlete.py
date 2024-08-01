@@ -124,4 +124,3 @@ def test_CreateAthletes_failure(mock_post):
     assert len(response['failures']) == 1
     assert 'Duplicate or Invalid Athlete Name' in response['failures']
     assert response['failures']['Duplicate or Invalid Athlete Name'][0] == f"Name_{formatted_time}"
-

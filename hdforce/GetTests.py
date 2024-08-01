@@ -139,7 +139,9 @@ def GetTests(from_=None, to_=None, sync=False, athleteId=None, typeId=None, team
             "pqgf2TPUOQOQs6r0HQWb": ["pqgf2TPUOQOQs6r0HQWb", "CMJ Rebound", "CMJR"],
             "r4fhrkPdYlLxYQxEeM78": ["r4fhrkPdYlLxYQxEeM78", "Multi Rebound", "MR"],
             "ubeWMPN1lJFbuQbAM97s": ["ubeWMPN1lJFbuQbAM97s", "Weigh In", "WI"],
-            "rKgI4y3ItTAzUekTUpvR": ["rKgI4y3ItTAzUekTUpvR", "Drop Landing", "DL"]
+            "rKgI4y3ItTAzUekTUpvR": ["rKgI4y3ItTAzUekTUpvR", "Drop Landing", "DL"],
+            "4KlQgKmBxbOY6uKTLDFL": ["4KlQgKmBxbOY6uKTLDFL", "TS Free Run", "TSFR"],
+            "umnEZPgi6zaxuw0KhUpM": ["umnEZPgi6zaxuw0KhUpM", "TS Isometric Test", "TSISO"]
         }
         # Sort test type Id
         for key, values in type_ids.items():

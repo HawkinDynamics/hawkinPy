@@ -1,0 +1,30 @@
+name: Update README Badges
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Update README badges
+      run: |
+        sed -i "s|branch=.*)](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml)|branch=${GITHUB_REF#refs/heads/})](https://github.com/HawkinDynamics/hawkinPy/actions/workflows/push-test.yml)|" README.md
+        sed -i "s|hawkinPy/.*)](https://img.shields.io/github/last-commit/HawkinDynamics/hawkinPy/)|hawkinPy/${GITHUB_REF#refs/heads/})](https://img.shields.io/github/last-commit/HawkinDynamics/hawkinPy/)|" README.md
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add README.md
+        git commit -m "Update README badges with branch ${GITHUB_REF#refs/heads/}"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

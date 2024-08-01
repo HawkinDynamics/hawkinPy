@@ -1,5 +1,9 @@
 # Changelogs
 
+## hdforce v1.1.2
+
+* Bug fix: addition of new TruStrength test names and IDs to testTypeId validation method
+
 ## hdforce v1.1.1
 
 * Corrected versioning and documentation

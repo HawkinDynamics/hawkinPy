@@ -53,5 +53,3 @@ _output_
   "successful": ["New Guy", "Old Guy"],
   "failures": []
 }
-
-
