@@ -45,7 +45,7 @@ jobs:
 
     - name: Install Poetry
       if: steps.cache.outputs.cache-hit != 'true'
-      run:
+      run: |
         python -m pip install --upgrade pip
         pip install poetry
 
