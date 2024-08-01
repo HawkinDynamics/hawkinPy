@@ -128,3 +128,4 @@ def CreateAthletes(athletes: List[NewAthlete]) -> List[AthleteResult]:
     except ValueError:
         logger.error("Failed to parse response JSON")
         raise Exception("Failed to parse response JSON")
+

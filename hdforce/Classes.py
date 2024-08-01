@@ -56,3 +56,4 @@ class AthleteResult(BaseModel):
     successful: bool
     id: str
     reason: List[str] = []
+    
