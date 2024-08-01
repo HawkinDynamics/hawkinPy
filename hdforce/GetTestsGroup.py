@@ -4,14 +4,17 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, ConfigManager
+from .utils import responseHandler, logger, ConfigManager, deprecated
 from .AuthManager import AuthManager
+# Enable deprecation warnings globally
+import warnings
+warnings.simplefilter('always', DeprecationWarning)
 
 # -------------------- #
 # Tests by Group
 
-
-def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
+@deprecated('Use `GetTests` instead, which has been expanded to handle all requests.')
+def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool = False, includeInactive: bool = False) -> pd.DataFrame:
     """Get test trials for specified team(s). Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
 
     Parameters
@@ -28,8 +31,8 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
     sync : bool, optional
         If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
-    active : bool, optional
-        If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
+    includeInactive : bool, optional
+        Default to False, where only active tests are returned. If True, all tests including inactive ones are returned.
 
     Returns
     -------
@@ -46,17 +49,18 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
         If the HTTP response status is not 200, indicating an unsuccessful API request, or if there is a failure in parsing the JSON response.
     ValueError
         If the 'groupId' parameter is not properly formatted as a string or a list/tuple of strings.
+    
+    Deprecated
+    ----------
+    Use `GetTests` instead, which has been expanded to handle all requests.
     """
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
     tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-    logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # get current time in timestamp
     now = datetime.datetime.now()
     nowtime = datetime.datetime.timestamp(now)
-    if nowtime < tokenExp:
-        logger.debug(f"Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Validate refresh token and expiration
     if a_token is None:
@@ -91,47 +95,46 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
             logger.error("Failed to authenticate. Try AuthManager")
             raise Exception("Failed to authenticate. Try AuthManage")
     else:
-        logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
-
-    # API Cloud URL
-    url_cloud = os.getenv("CLOUD_URL")
-
-    # From DateTime
-    from_dt = ""
-    if from_ is not None:
-        if sync:
-            from_dt = f"&syncFrom={from_}"
-        else:
-            from_dt = f"&from={from_}"
-
-    # To DateTime
-    to_dt = ""
-    if to_ is not None:
-        if sync:
-            to_dt = f"&syncTo={to_}"
-        else:
-            to_dt = f"&to={to_}"
-
-    # Group ID
-    if isinstance(groupId, str):
-        g_id = groupId
-    else:
-        logger.error("groupId incorrect. Check your entry")
-        raise Exception("groupId incorrect. Check your entry")
+        logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Create URL for request
-    url = f"{url_cloud}?groupId={g_id}{from_dt}{to_dt}"
+    url = os.getenv("CLOUD_URL")
 
+    # Create blank Query list to handle parameters
+    query = {}
+
+    # Handling groupId input whether single ID or tuple of IDs
+    if isinstance(groupId, (tuple, list)):
+        query['groupId']  = ','.join(map(str, groupId))  # Join multiple team IDs into a comma-separated string
+    elif isinstance(groupId, str):
+        query['groupId'] = groupId  # Use the single team ID as is
+    else:
+        logger.error("groupId must be a string or a tuple/list of strings.")
+        raise ValueError("groupId must be a string or a tuple/list of strings.")
+    
+    # Evaluate from and to dates for Sync command
+    if sync is True:
+        if from_ is not None:
+            query['syncFrom'] = from_
+        if to_ is not None:
+            query['syncTo'] = to_
+    elif sync is False:
+        if from_ is not None:
+            query['from'] = from_
+        if to_ is not None:
+            query['to'] = to_
+
+    # Log request
+    if from_ is not None and to_ is not None:
+        logger.debug(f"Group Test Request from_dt to_dt")
+    elif from_ is None:
+        logger.debug(f"Group Test Request to_dt")
+    elif to_ is None:
+        logger.debug(f"Group Test Request from_dt")
+    
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
-    response = requests.get(url, headers=headers)
-    # Log request
-    if from_dt is not None and to_dt is not None:
-        logger.debug(f"Group Test Request from_dt to_dt")
-    elif from_dt is None:
-        logger.debug(f"Group Test Request to_dt")
-    elif to_dt is None:
-        logger.debug(f"Group Test Request from_dt")
+    response = requests.get(url, headers=headers, params=query)
 
     # Check response status and handle data accordingly
     if response.status_code != 200:
@@ -149,7 +152,7 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
         df = responseHandler(data)
 
         # Filter active tests if required
-        if 'active' in df.columns and active:
+        if 'active' in df.columns and includeInactive == False:
             df = df[df['active'] == True]
 
         # Setting attributes

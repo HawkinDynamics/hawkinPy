@@ -15,12 +15,12 @@ logger = LoggerConfig.get_logger(__name__)
 # Get Athletes
 
 
-def GetAthletes(inactive: bool = False) -> pd.DataFrame:
+def GetAthletes(includeInactive: bool = False) -> pd.DataFrame:
     """Get the athlete information from an account.
 
     Parameters
     ----------
-    inactive : bool, optional
+    includeInactive : bool, optional
         A boolean that specifies whether to include inactive athletes in the results. Default is False, meaning by default inactive athletes are not included.
 
     Returns
@@ -42,13 +42,10 @@ def GetAthletes(inactive: bool = False) -> pd.DataFrame:
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
     tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-    logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # get current time in timestamp
     now = datetime.datetime.now()
     nowtime = datetime.datetime.timestamp(now)
-    if nowtime < tokenExp:
-        logger.debug(f"Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Validate refresh token and expiration
     if a_token is None:
@@ -83,23 +80,24 @@ def GetAthletes(inactive: bool = False) -> pd.DataFrame:
             logger.error("Failed to authenticate. Try AuthManager")
             raise Exception("Failed to authenticate. Try AuthManage")
     else:
-        logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
+        logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # API Cloud URL
     url_cloud = os.getenv("CLOUD_URL")
 
     # Create URL for request
-    url = f"{url_cloud}/athletes?inactive={inactive}"
+    url = f"{url_cloud}/athletes?inactive={includeInactive}"
 
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
 
     # Create Response
-    response = requests.get(url, headers=headers)
-    if inactive:
+    if includeInactive:
         logger.debug("GET Request: Athletes (inactive = true)")
     else:
         logger.debug("GET Request: Athletes (inactive = false)")
+    # GET Request
+    response = requests.get(url, headers=headers)
 
     # Response Handling
     # If Error show error

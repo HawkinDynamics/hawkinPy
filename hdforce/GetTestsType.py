@@ -4,14 +4,17 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, ConfigManager
+from .utils import responseHandler, logger, ConfigManager, deprecated
 from .AuthManager import AuthManager
+# Enable deprecation warnings globally
+import warnings
+warnings.simplefilter('always', DeprecationWarning)
 
 # -------------------- #
 # Tests by Type
 
-
-def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True) -> pd.DataFrame:
+@deprecated('Use `GetTests` instead, which has been expanded to handle all requests.')
+def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = False, includeInactive: bool = False) -> pd.DataFrame:
     """Get tests trials based on a specific test type from an API. Allows filtering of results based on time frames and the state of the test (active or not).
 
     Parameters
@@ -28,8 +31,8 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
     sync : bool, optional
         If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
-    active : bool, optional
-        If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
+    includeInactive : bool, optional
+        Default to False, where only active tests are returned. If True, all tests including inactive ones are returned.
 
     Returns
     -------
@@ -47,17 +50,18 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
         If the HTTP response status is not 200, indicating an unsuccessful API request, or if there is a failure in parsing the JSON response.
     Exception
         If the provided 'typeId' does not match any known test types, causing an inability to proceed with the API request.
+    
+    Deprecated
+    ----------
+    Use `GetTests` instead, which has been expanded to handle all requests.
     """
     # Retrieve Access Token and check expiration
     a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
     tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-    logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # get current time in timestamp
     now = datetime.datetime.now()
     nowtime = datetime.datetime.timestamp(now)
-    if nowtime < tokenExp:
-        logger.debug(f"Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
 
     # Validate refresh token and expiration
     if a_token is None:
@@ -92,39 +96,37 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
             logger.error("Failed to authenticate. Try AuthManager")
             raise Exception("Failed to authenticate. Try AuthManage")
     else:
-        logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
+        logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
 
-    # API Cloud URL
-    url_cloud = os.getenv("CLOUD_URL")
+    # Create blank Query list to handle parameters
+    query = {}
 
-    # From DateTime
-    from_dt = ""
-    if from_ is not None:
-        if sync:
-            from_dt = f"&syncFrom={from_}"
-        else:
-            from_dt = f"&from={from_}"
-
-    # To DateTime
-    to_dt = ""
-    if to_ is not None:
-        if sync:
-            to_dt = f"&syncTo={to_}"
-        else:
-            to_dt = f"&to={to_}"
+    # Evaluate from and to dates for Sync command
+    if sync is True:
+        if from_ is not None:
+            query['syncFrom'] = from_
+        if to_ is not None:
+            query['syncTo'] = to_
+    elif sync is False:
+        if from_ is not None:
+            query['from'] = from_
+        if to_ is not None:
+            query['to'] = to_
 
     # Check typeId
     type_ids = {
-        "7nNduHeM5zETPjHxvm7s": ["7nNduHeM5zETPjHxvm7s", "Countermovement Jump", "CMJ"],
-        "QEG7m7DhYsD6BrcQ8pic": ["QEG7m7DhYsD6BrcQ8pic", "Squat Jump", "SJ"],
-        "2uS5XD5kXmWgIZ5HhQ3A": ["2uS5XD5kXmWgIZ5HhQ3A", "Isometric Test", "ISO"],
-        "gyBETpRXpdr63Ab2E0V8": ["gyBETpRXpdr63Ab2E0V8", "Drop Jump", "DJ"],
-        "5pRSUQVSJVnxijpPMck3": ["5pRSUQVSJVnxijpPMck3", "Free Run", "FREE"],
-        "pqgf2TPUOQOQs6r0HQWb": ["pqgf2TPUOQOQs6r0HQWb", "CMJ Rebound", "CMJR"],
-        "r4fhrkPdYlLxYQxEeM78": ["r4fhrkPdYlLxYQxEeM78", "Multi Rebound", "MR"],
-        "ubeWMPN1lJFbuQbAM97s": ["ubeWMPN1lJFbuQbAM97s", "Weigh In", "WI"],
-        "rKgI4y3ItTAzUekTUpvR": ["rKgI4y3ItTAzUekTUpvR", "Drop Landing", "DL"]
-    }
+            "7nNduHeM5zETPjHxvm7s": ["7nNduHeM5zETPjHxvm7s", "Countermovement Jump", "CMJ"],
+            "QEG7m7DhYsD6BrcQ8pic": ["QEG7m7DhYsD6BrcQ8pic", "Squat Jump", "SJ"],
+            "2uS5XD5kXmWgIZ5HhQ3A": ["2uS5XD5kXmWgIZ5HhQ3A", "Isometric Test", "ISO"],
+            "gyBETpRXpdr63Ab2E0V8": ["gyBETpRXpdr63Ab2E0V8", "Drop Jump", "DJ"],
+            "5pRSUQVSJVnxijpPMck3": ["5pRSUQVSJVnxijpPMck3", "Free Run", "FREE"],
+            "pqgf2TPUOQOQs6r0HQWb": ["pqgf2TPUOQOQs6r0HQWb", "CMJ Rebound", "CMJR"],
+            "r4fhrkPdYlLxYQxEeM78": ["r4fhrkPdYlLxYQxEeM78", "Multi Rebound", "MR"],
+            "ubeWMPN1lJFbuQbAM97s": ["ubeWMPN1lJFbuQbAM97s", "Weigh In", "WI"],
+            "rKgI4y3ItTAzUekTUpvR": ["rKgI4y3ItTAzUekTUpvR", "Drop Landing", "DL"],
+            "4KlQgKmBxbOY6uKTLDFL": ["4KlQgKmBxbOY6uKTLDFL", "TS Free Run", "TSFR"],
+            "umnEZPgi6zaxuw0KhUpM": ["umnEZPgi6zaxuw0KhUpM", "TS Isometric Test", "TSISO"]
+        }
 
     for key, values in type_ids.items():
         if typeId in values:
@@ -134,19 +136,23 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
         logger.error("typeId incorrect. Check your entry")
         raise Exception("typeId incorrect. Check your entry")
 
+    # Add Test Type Id to params query
+    query['testTypeId'] = t_id
+    
     # Create URL for request
-    url = f"{url_cloud}?testTypeId={t_id}{from_dt}{to_dt}"
+    url = os.getenv("CLOUD_URL")
+
+    # Log request
+    if from_ is not None and to_ is not None:
+        logger.debug(f"Test Type Request from_dt to_dt")
+    elif from_ is None:
+        logger.debug(f"Test Type Request to_dt")
+    elif to_ is None:
+        logger.debug(f"Test Type Request from_dt")
 
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
-    response = requests.get(url, headers=headers)
-    # Log request
-    if from_dt is not None and to_dt is not None:
-        logger.debug(f"Test Type Request from_dt to_dt")
-    elif from_dt is None:
-        logger.debug(f"Test Type Request to_dt")
-    elif to_dt is None:
-        logger.debug(f"Test Type Request from_dt")
+    response = requests.get(url, headers=headers, params=query)
 
     # Check response status and handle data accordingly
     if response.status_code != 200:
@@ -164,7 +170,7 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
         df = responseHandler(data)
 
         # Filter active tests if required
-        if 'active' in df.columns and active:
+        if 'active' in df.columns and includeInactive == False:
             df = df[df['active'] == True]
 
         # Create Test Type info for df attrs

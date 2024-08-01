@@ -1,4 +1,7 @@
-__`GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = False, active: bool = True)`__
+__`GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = False, includeInactive: bool = False)`__
+
+> As of July 10, 2024 `GetTestsTeam` has been deprecated for the preferred use 
+> of `GetTests`. This function will be fully superseded Jan 01, 2025 12:00:00.
 
 ### Description
 Get test trials only from a specific type of test. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
@@ -16,6 +19,8 @@ The typeId has been created to be more user friendly, as it accepts any of canon
 | r4fhrkPdYlLxYQxEeM78 | Multi Rebound | MR |
 | ubeWMPN1lJFbuQbAM97s | Weigh In | WI |
 | rKgI4y3ItTAzUekTUpvR | Drop Landing | DL |
+| 4KlQgKmBxbOY6uKTLDFL | TS Free Run | TSFR |
+| umnEZPgi6zaxuw0KhUpM | TS Isometric Test | TSISO |
 
 ### Parameters
 __`typeId`__: _(str)_ The canonical test ID, test type name, or test name abbreviation. Must correspond to known test types.
@@ -26,7 +31,7 @@ __`to_`__: _(int)_ Unix timestamp specifying the end time until which tests shou
 
 __`sync`__: _(bool)_ If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
-__`active`__: _(bool)_ If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
+__`includeInactive`__: _(bool)_ If True, only active tests are fetched. If False, all tests including inactive ones are fetched. Default is True.
 
 ### Returns
 A Pandas DataFrame containing details of the test trial, with columns:
