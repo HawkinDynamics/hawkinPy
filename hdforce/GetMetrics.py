@@ -23,7 +23,7 @@ def GetMetrics(test_type=None) -> pd.DataFrame:
         - testTypeName: The name of each metric.
         - id: The unique identifier for each metric.
         - label: The label (common name) for each metric
-        - header: The headers of the metrics as they are returned from the API
+        - label_unit: The headers of the metrics as they are returned from the API
         - units: Units of measure
         - description: Full description of metric and calculation*
     """

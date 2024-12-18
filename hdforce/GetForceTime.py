@@ -110,17 +110,52 @@ def GetForceTime(testId: str) -> pd.DataFrame:
         # Flatten test data from response
         data = response.json()
 
+        # Get Test Type
+        test_type = data['testType']['canonicalId']
+
+        def pad_array(arr, target_length, pad_value=None):
+            return arr + [pad_value] * (target_length - len(arr))
+
+        # Target length is the length of the primary time array
+        target_length = len(data.get("Time(s)", []))
+
+        time_data = data.get("Time(s)", [])
+        left_force = pad_array(data.get("LeftForce(N)", []), target_length, None)
+        right_force = pad_array(data.get("RightForce(N)", []), target_length, None)
+        combined_force = pad_array(data.get("CombinedForce(N)", []), target_length, None)
+        velocity = pad_array(data.get("Velocity(m/s)", []), target_length, None)
+        displacement = pad_array(data.get("Displacement(m)", []), target_length, None)
+        power = pad_array(data.get("Power(W)", []), target_length, None)
+
         # Create DataFrame from the array data
-        df = pd.DataFrame({
-            "Time(s)": data["Time(s)"],
-            "LeftForce(N)": data["LeftForce(N)"],
-            "RightForce(N)": data["RightForce(N)"],
-            "CombinedForce(N)": data["CombinedForce(N)"],
-            "Velocity(m/s)": data["Velocity(m/s)"],
-            "Displacement(m)": data["Displacement(m)"],
-            "Power(W)": data["Power(W)"],
-            "rsi": [data["rsi"]] * len(data["Time(s)"])  # Assuming rsi is a constant value
-        })
+        if test_type in [
+        "r4fhrkPdYlLxYQxEeM78",  # Multi Rebound
+        "2uS5XD5kXmWgIZ5HhQ3A",  # Isometric
+        "5pRSUQVSJVnxijpPMck3",  # Free Run
+        "ubeWMPN1lJFbuQbAM97s"   # Weigh In
+        ]:
+            df = pd.DataFrame({
+                "time": time_data,
+                "leftForce": left_force,
+                "rightForce": right_force,
+                "combinedForce": combined_force
+            })
+        elif test_type in ["4KlQgKmBxbOY6uKTLDFL", "umnEZPgi6zaxuw0KhUpM"]:  # TruStrength tests
+            df = pd.DataFrame({
+                "time": time_data,
+                "combinedForce": combined_force
+            })
+        else:
+            df = pd.DataFrame({
+                "time": time_data,
+                "leftForce": left_force,
+                "rightForce": right_force,
+                "combinedForce": combined_force,
+                "velocity": velocity,
+                "displacement": displacement,
+                "power": power
+            })
+            data.get("Time(s)",)
 
         # Setting attributes
         df.attrs['Test ID'] = data['id']
@@ -128,7 +163,6 @@ def GetForceTime(testId: str) -> pd.DataFrame:
         df.attrs['Athlete Name'] = data['athlete']['name']
         df.attrs['Athlete ID'] = data['athlete']['id']
         df.attrs['Timestamp'] = pd.to_datetime(data['timestamp'], unit='s')
-        df.attrs['RSI'] = data['rsi']
         logger.info(f"Request successful: {df.attrs['Test Name']} - {df.attrs['Test ID']} - {df.attrs['Timestamp']}")
         return df
 

@@ -5,6 +5,7 @@ nav:
     - Authentication: UserGuide/EnvSetUp.md
     - Get Your Data: UserGuide/GetData.md
     - Example Usage: UserGuide/Examples.md
+    - Creating A Local Database: UserGuide/LocalDatabase.md
   - Function:
     - AuthManager: Functions/AuthManager.md
     - BuildDB: Functions/BuildDB.md
