@@ -11,6 +11,59 @@ from .LoggerConfig import LoggerConfig
 logger = LoggerConfig.get_logger(__name__)
 
 # -------------------- #
+# EPOCH Converter
+# Helper function to convert dates
+
+
+def dtConverter(date_value):
+    """
+    Converts a date string in 'YYYY-MM-DD' format or an integer epoch to an epoch timestamp.
+
+    Parameters:
+    -----------
+    date_value : str or int
+        The date value to convert.
+
+    Returns:
+    --------
+    int
+        The epoch timestamp.
+    """
+    if isinstance(date_value, int):
+        return date_value  # Already in epoch format
+    elif isinstance(date_value, str):
+        try:
+            dt = datetime.datetime.strptime(date_value, '%Y-%m-%d')
+            return int(dt.timestamp())  # Convert to epoch
+        except ValueError:
+            logger.error(f"Invalid date format: {date_value}. Use 'YYYY-MM-DD' or epoch.")
+            raise ValueError("Invalid date format. Use 'YYYY-MM-DD' or epoch.")
+    else:
+        logger.error(f"Unsupported date format: {date_value}")
+        raise TypeError("Date must be an integer (epoch) or a string in 'YYYY-MM-DD' format.")
+
+
+
+# -------------------- #
+# Metric Dictionary
+
+
+class Metrics:
+    metric_dictionary = None
+
+    @classmethod
+    def MetricDictionary(cls):
+        # Load the DataFrame once during package initialization, if not already loaded
+        if cls.metric_dictionary is None:
+            DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data', 'MetricDictionary.parquet')
+            try:
+                cls.metric_dictionary = pd.read_parquet(DATA_FILE_PATH)
+            except FileNotFoundError:
+                raise FileNotFoundError(f"Could not find the Parquet file at {DATA_FILE_PATH}")
+        return cls.metric_dictionary
+
+
+# -------------------- #
 # Configuration Manager
 
 
@@ -209,8 +262,7 @@ def responseHandler(json_data):
 
     """
     # 1 - Create normalized DataFrame
-    dfAll = json_normalize(json_data['data'], errors='ignore')
-        
+    dfAll = pd.json_normalize(json_data['data'], errors='ignore')
 
     # 2 - Remove athlete and testType columns
     # 2.1 - Generate a list of columns to drop
@@ -219,25 +271,51 @@ def responseHandler(json_data):
     # 2.2 - Drop the columns from the DataFrame
     dfAll.drop(columns=columns_to_drop, inplace=True)
 
+    # 2.3 Clean metric names
+    # Separate columns 'id', 'timestamp', 'segment', and 'active' into a new DataFrame
+    columns_to_separate = ['id', 'timestamp', 'segment', 'active']
+
+    # DataFrame with the selected columns
+    df_selected = dfAll[columns_to_separate]
+
+    # DataFrame with the rest of the columns
+    df_metrics = dfAll.drop(columns=columns_to_separate)
+
+    # Use Metric Dictionary from Metrics class
+    metric_dictionary = Metrics.MetricDictionary()
+
+    # Clean metric headers
+    # Create a mapping dictionary from 'header' to 'id'
+    mapping_dict = dict(zip(metric_dictionary['label_unit'], metric_dictionary['id']))
+    
+    # Rename DataFrame columns based on the mapping dictionary
+    df_metrics = df_metrics.rename(columns=mapping_dict)
+
+    # Rejoin clean metric data frame
+    dfAll = df_selected.join(df_metrics)
+
+    # 3 - Deduplicate columns
+    dfAll = dfAll.loc[:, ~dfAll.columns.duplicated()]
+
     # 3.1 - Create DataFrame of athlete and testType info
     infoDF = pd.json_normalize(
-            json_data['data'],
-            meta=[
-                'id',
-                ['athlete', 'id'],
-                ['athlete', 'name'],
-                ['athlete', 'teams'],
-                ['athlete', 'groups'],
-                ['athlete', 'active'],
-                ['testType', 'id'],
-                ['testType', 'name'],
-                ['testType', 'canonicalId']
-            ], errors='ignore'
-        )
+        json_data['data'],
+        meta=[
+            'id',
+            ['athlete', 'id'],
+            ['athlete', 'name'],
+            ['athlete', 'teams'],
+            ['athlete', 'groups'],
+            ['athlete', 'active'],
+            ['testType', 'id'],
+            ['testType', 'name'],
+            ['testType', 'canonicalId']
+        ], errors='ignore'
+    )
 
     # 4.3 - Create DataFrame of tags column from infoDF
     tags = pd.DataFrame(infoDF["testType.tags"])
-    
+
     # 3.2 - Extract only athlete and testType data
     selected_columns = infoDF.columns[infoDF.columns.astype(str).str.startswith('athlete') | infoDF.columns.astype(str).str.startswith('testType')]
 
@@ -253,10 +331,7 @@ def responseHandler(json_data):
     def extract_names(tags):
         return [tag['name'] for tag in tags if 'name' in tag]
 
-    # 4.3 - Create DataFrame of tags column from infoDF
-        tags = pd.DataFrame(infoDF["testType.tags"])
-
-    # 4.4 - Apply these functions to create new columns in tags
+    # 4.3 - Apply these functions to create new columns in tags
     tags['tag_ids'] = tags['testType.tags'].apply(extract_ids)
     tags['tag_names'] = tags['testType.tags'].apply(extract_names)
 
@@ -303,8 +378,12 @@ def responseHandler(json_data):
     # 12 - change "athlete_external_" to "external_" in column names
     df.columns = [col.replace('athlete_external_', 'external_') for col in df.columns]
 
-    return df
+    # 13 - Ensure all "external_" columns are strings
+    external_columns = [col for col in df.columns if col.startswith("external_")]
+    for col in external_columns:
+        df[col] = df[col].astype(str)
 
+    return df
 
 # -------------------- #
 # Deprecation Decorator

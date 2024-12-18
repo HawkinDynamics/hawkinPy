@@ -1,5 +1,19 @@
 # Changelogs
 
+## hdforce v1.2.0
+
+* Addition of `BuildDB` and `SyncDB` functions for storing and updating local database
+
+* Addition of `last_sync_time` value to `GetTests` functions
+
+* Changes to `GetTests` metric headers. Improved consistency of naming reflective of the metric library
+
+* Improved functionality to `GetTests` to accept character strings in the format "YYYY-MM-DD" for `from` and `to`
+
+* Addition of 'Metric Library' returned from `GetMetrics` 
+
+* Improved functionality to `GetForceTime`to return all test types
+
 ## hdforce v1.1.2
 
 * Bug fix: addition of new TruStrength test names and IDs to testTypeId validation method
