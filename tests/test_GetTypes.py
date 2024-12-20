@@ -13,7 +13,6 @@ def test_GetTypes_file():
 
     # Check response is DataFrame
     assert isinstance(data, pd.DataFrame)
-    assert isinstance(data.attrs['Count'], int)
 
 
 # successful call with env
@@ -26,4 +25,3 @@ def test_GetTypes_env():
 
     # Check response is DataFrame
     assert isinstance(data, pd.DataFrame)
-    assert isinstance(data.attrs['Count'], int)

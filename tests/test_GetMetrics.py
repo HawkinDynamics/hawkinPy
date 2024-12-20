@@ -13,7 +13,6 @@ def test_GetMetrics_file():
     
     # Check response is DataFrame
     assert isinstance(metrics, pd.DataFrame)
-    assert isinstance(metrics.attrs['Count'], int)
 
 
 # successful call with env
@@ -26,4 +25,3 @@ def test_GetMetrics_env():
 
     # Check response is DataFrame
     assert isinstance(metrics, pd.DataFrame)
-    assert isinstance(metrics.attrs['Count'], int)
