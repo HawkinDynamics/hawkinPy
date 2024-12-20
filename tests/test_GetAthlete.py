@@ -8,7 +8,7 @@ import os
 def test_GetAthletes_file():
 
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= "tests/.env")
+    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
     # Call for athletes
     players = GetAthletes()
 

@@ -7,7 +7,7 @@ import pandas as pd
 def test_GetTypes_file():
 
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= "tests/.env")
+    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
     # Call for test types
     data = GetTypes()
 
