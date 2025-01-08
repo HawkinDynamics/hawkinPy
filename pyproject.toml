@@ -29,6 +29,7 @@ pytest = "^8.2.0"
 flake8 = "^7.0.0"
 pydantic = "^2.0.0" 
 pyarrow = "^18.1.0"
+pyjanitor = "^0.30.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.4"

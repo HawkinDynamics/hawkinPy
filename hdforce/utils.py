@@ -1,6 +1,7 @@
 # Dependencies
 import pandas as pd
 from pandas import json_normalize
+from janitor import clean_names
 import requests
 import datetime
 import os
@@ -264,34 +265,28 @@ def responseHandler(json_data):
     # 1 - Create normalized DataFrame
     dfAll = pd.json_normalize(json_data['data'], errors='ignore')
 
-    # 2 - Remove athlete and testType columns
+    # Step 2 - Remove athlete and testType columns
     # 2.1 - Generate a list of columns to drop
     columns_to_drop = [col for col in dfAll.columns if col.startswith('testType') or col.startswith('athlete')]
 
     # 2.2 - Drop the columns from the DataFrame
     dfAll.drop(columns=columns_to_drop, inplace=True)
 
-    # 2.3 Clean metric names
+    # 2.3 Clean metric names using janitor
     # Separate columns 'id', 'timestamp', 'segment', and 'active' into a new DataFrame
     columns_to_separate = ['id', 'timestamp', 'segment', 'active']
+    df_selected = dfAll[columns_to_separate]  # DataFrame with the selected columns
 
-    # DataFrame with the selected columns
-    df_selected = dfAll[columns_to_separate]
-
-    # DataFrame with the rest of the columns
+    # DataFrame with the remaining columns
     df_metrics = dfAll.drop(columns=columns_to_separate)
 
-    # Use Metric Dictionary from Metrics class
-    metric_dictionary = Metrics.MetricDictionary()
+    # Use janitor to clean column names in snake_case
+    df_metrics = df_metrics.clean_names(remove_special=True)
 
-    # Clean metric headers
-    # Create a mapping dictionary from 'header' to 'id'
-    mapping_dict = dict(zip(metric_dictionary['label_unit'], metric_dictionary['id']))
-    
-    # Rename DataFrame columns based on the mapping dictionary
-    df_metrics = df_metrics.rename(columns=mapping_dict)
+    # Strip trailing underscores from column names
+    df_metrics.columns = df_metrics.columns.str.rstrip('_')
 
-    # Rejoin clean metric data frame
+    # Rejoin the cleaned metric DataFrame with the selected columns
     dfAll = df_selected.join(df_metrics)
 
     # 3 - Deduplicate columns
