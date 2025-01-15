@@ -58,7 +58,7 @@ import hdforce as hd
 types = hd.GetTypes()
 
 # Get all athletes (including inactive)
-players = hd.GetAthletes( inactive = True )
+players = hd.GetAthletes( includeInactive = True )
 
 # Get Teams, Groups, Tags for filtering tests
 teams = hd.GetTeams()
