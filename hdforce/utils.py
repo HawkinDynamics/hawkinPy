@@ -169,6 +169,9 @@ class TokenManager:
     region : str
         The geographic region associated with the API endpoint. Defaults to "Americas", with other options being "Europe" and "Asia/Pacific".
 
+    orgName : str
+        The tech support provided organization name and endpoint to access custom features that were requested by the user
+
     Attributes
     ----------
     refreshToken : str
@@ -176,6 +179,9 @@ class TokenManager:
 
     region : str
         Stores the region.
+
+    orgName : str
+        Stores org endpoint to use.
 
     accessToken : str or None
         Stores the current access token.
@@ -190,9 +196,10 @@ class TokenManager:
         Stores the base URL for the API corresponding to the region.
     """
     # Class attributes
-    def __init__(self, refreshToken, region, fileName):
+    def __init__(self, refreshToken, region, orgName=None, fileName=None):
         self.refreshToken = refreshToken
         self.region = region
+        self.orgName = orgName or "dev"  # Default to 'dev' if no orgName is provided
         self.accessToken = None
         self.ExpirationVal = None
         self.ExpirationStr = None
@@ -211,11 +218,13 @@ class TokenManager:
         }.get(self.region, "https://cloud.dev.hawkindynamics.com/api/token")
 
         # Set Cloud URL
-        self.url_cloud = {
-            "Americas": "https://cloud.hawkindynamics.com/api/dev",
-            "Europe": "https://eu.cloud.hawkindynamics.com/api/dev",
-            "Asia/Pacific": "https://apac.cloud.hawkindynamics.com/api/dev"
-        }.get(self.region, "https://cloud.dev.hawkindynamics.com/api/dev")
+        base_url = {
+            "Americas": "https://cloud.hawkindynamics.com/api",
+            "Europe": "https://eu.cloud.hawkindynamics.com/api",
+            "Asia/Pacific": "https://apac.cloud.hawkindynamics.com/api"
+        }.get(self.region, "https://cloud.dev.hawkindynamics.com/api")
+
+        self.url_cloud = f"{base_url}/{self.orgName}"  # Append orgName to URL
 
         # Set auth headers
         headers = {"Authorization": f"Bearer {self.refreshToken}"}
