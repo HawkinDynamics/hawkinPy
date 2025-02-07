@@ -19,8 +19,6 @@ from .GetAthletes import GetAthletes
 from .GetGroups import GetGroups
 from .GetTeams import GetTeams
 from .GetTags import GetTags
-from .BuildDB import BuildDB
-from .SyncDB import SyncDB
 
 # Load Metric Dictionary
 from .utils import Metrics
