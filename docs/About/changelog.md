@@ -1,8 +1,6 @@
 # Changelogs
 
-## hdforce v1.2.0
-
-* Addition of `BuildDB` and `SyncDB` functions for storing and updating local database
+## hdforce v1.1.3
 
 * Addition of `last_sync_time` value to `GetTests` functions
 

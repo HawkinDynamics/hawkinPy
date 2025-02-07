@@ -1,4 +1,4 @@
-site_name: hdforce v1.2.0 by Hawkin Dynamics
+site_name: hdforce v1.1.3 by Hawkin Dynamics
 nav:
   - Home: index.md
   - User Guide:
@@ -82,4 +82,4 @@ markdown_extensions:
 
 
 copyright: |
-  &copy; 2024 <a href="https://www.hawkindynamics.com/" target="_blank" rel="noopener">Hawkin Dynamics</a>
+  &copy; 2025 <a href="https://www.hawkindynamics.com/" target="_blank" rel="noopener">Hawkin Dynamics</a>
