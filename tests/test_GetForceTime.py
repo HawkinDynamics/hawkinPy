@@ -7,7 +7,7 @@ import pandas as pd
 def test_GetForceTime_file():
     
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= "tests/.env")
+    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
 
     # Call for ForceTime
     data = GetForceTime(testId = "9Ytz9g1erMXm3SByTyEd")

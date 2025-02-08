@@ -11,7 +11,7 @@ logger = LoggerConfig.get_logger(__name__)
 # Authenticator
 
 
-def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TOKEN", refreshToken: str = None, env_file_name: str = None, region: str = "Americas") -> None:
+def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TOKEN", refreshToken: str = None, env_file_name: str = None, region: str = "Americas", orgName: str = None) -> None:
     """ Choose the authentication settings
 
 
@@ -32,6 +32,8 @@ def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TO
     env_file_name : str
         Required with authMethod='file'. Provides file name for variable storage.
 
+    orgName : str, optional
+        If provided, it modifies the cloud API endpoint to access organization-specific resources.
 
     Raises
     ------
@@ -75,12 +77,11 @@ def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TO
         logger.debug(f"Refresh token: {kabrv}xxxx method: {authMethod}")
 
     # Setup session assuming TokenManager handles authentication
-    session = TokenManager(refreshToken=key, region=region, fileName=env_file_name)
+    session = TokenManager(refreshToken=key, region=region, orgName=orgName, fileName=env_file_name)
 
     # Create objects of classes
     accessToken = str(session.accessToken)
     tokenExpiration = str(session.ExpirationVal)
-    expirationStr = str(session.ExpirationStr)
     cloudURL = str(session.url_cloud)
     fileName = str(session.fileName)
 

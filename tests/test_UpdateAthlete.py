@@ -32,7 +32,7 @@ def test_UpdateAthletes_file(mock_put):
     mock_put.return_value = MagicMock(status_code=200, json=lambda: mock_success_response(formatted_time))
 
     # Authenticate
-    AuthManager(authMethod="file", env_file_name="tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env")
 
     # Create New Athletes
     players = [
@@ -100,7 +100,7 @@ def test_UpdateAthletes_failure(mock_put):
     mock_put.return_value = MagicMock(status_code=200, json=lambda: mock_failure_response(formatted_time))
 
     # Authenticate
-    AuthManager(authMethod="file", env_file_name="tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env")
 
     # Create New Athletes
     players = [

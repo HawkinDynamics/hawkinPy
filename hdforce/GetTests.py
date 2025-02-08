@@ -4,7 +4,7 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, ConfigManager
+from .utils import responseHandler, logger, ConfigManager, dtConverter
 from .AuthManager import AuthManager
 
 # -------------------- #
@@ -111,13 +111,19 @@ def GetTests(from_=None, to_=None, sync=False, athleteId=None, typeId=None, team
     if provided_count > 1:
         raise ValueError("Only one of athleteId, typeId, teamId, or groupId can be provided at the same time.")
 
+    # Convert from_ and to_ to epoch timestamps
+    if from_ is not None:
+        from_ = dtConverter(from_)
+    if to_ is not None:
+        to_ = dtConverter(to_)
+
     # Evaluate from and to dates for Sync command
     if sync is True:
         if from_ is not None:
             query['syncFrom'] = from_
         if to_ is not None:
             query['syncTo'] = to_
-    elif sync is False:
+    else:
         if from_ is not None:
             query['from'] = from_
         if to_ is not None:
@@ -187,7 +193,13 @@ def GetTests(from_=None, to_=None, sync=False, athleteId=None, typeId=None, team
         logger.debug(f"Test Request from_dt")
     # GET Request
     headers = {"Authorization": f"Bearer {a_token}"}
+    # Request Logging
+    logger.debug(f"Request headers: {headers}")
+    logger.debug(f"Request URL: {url}")
+    logger.debug(f"Query parameters: {query}")
+
     response = requests.get(url, headers=headers, params=query)
+    logger.debug(f"GetTests response code: {response.status_code}")
 
     # Check response status and handle data accordingly
     if response.status_code != 200:
@@ -229,9 +241,14 @@ def GetTests(from_=None, to_=None, sync=False, athleteId=None, typeId=None, team
             df.attrs['Athlete Id'] = athleteId
             df.attrs['Athlete Name'] = aName
         
-        df.attrs['Last Sync'] = int(data['lastSyncTime'])
+        last_sync_time = int(data['lastSyncTime'])
+        df.attrs['Last Sync'] = last_sync_time  # Save as attribute
         df.attrs['Last Test Time'] = int(data['lastTestTime'])
         df.attrs['Count'] = int(data['count'])
+
+        # Add Last Sync column
+        df['last_sync_time'] = last_sync_time
+        
         logger.info(f"Request successful. Tests returned: {data['count']}")
         return df
 

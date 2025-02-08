@@ -4,7 +4,7 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, ConfigManager, deprecated
+from .utils import responseHandler, logger, ConfigManager, deprecated, dtConverter
 from .AuthManager import AuthManager
 # Enable deprecation warnings globally
 import warnings
@@ -111,17 +111,24 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
         logger.error("athleteId incorrect. Check your entry")
         raise Exception("athleteId incorrect. Check your entry")
 
+    # Convert from_ and to_ to epoch timestamps
+    if from_ is not None:
+        from_ = dtConverter(from_)
+    if to_ is not None:
+        to_ = dtConverter(to_)
+
     # Evaluate from and to dates for Sync command
     if sync is True:
         if from_ is not None:
             query['syncFrom'] = from_
         if to_ is not None:
             query['syncTo'] = to_
-    elif sync is False:
+    else:
         if from_ is not None:
             query['from'] = from_
         if to_ is not None:
             query['to'] = to_
+
 
     # Log request
     if from_ is not None and to_ is not None:
@@ -164,6 +171,11 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
         df.attrs['Last Sync'] = int(data['lastSyncTime'])
         df.attrs['Last Test Time'] = int(data['lastTestTime'])
         df.attrs['Count'] = int(data['count'])
+
+        # Add Last Sync column
+        last_sync_time = int(data['lastSyncTime'])
+        df['last_sync_time'] = last_sync_time
+
         logger.info(f"Request successful. Returned {df.attrs['Count']} tests from athlete: {athleteId}.")
         return df
 
