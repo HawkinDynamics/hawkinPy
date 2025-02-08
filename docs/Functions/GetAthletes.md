@@ -4,7 +4,7 @@ __`GetAthletes(inactive: bool = False)`__
 Get the athletes for an account.
 
 ### Parameters
-`inactive`: (_bool_) Specifies whether to include inactive athletes in the results. Default is False (inactive athletes are not included).
+`includeInactive`: (_bool_) Specifies whether to include inactive athletes in the results. Default is False (inactive athletes are not included).
 
 ### Returns
 A Pandas DataFrame containing the athletes' information, with columns:
@@ -30,7 +30,7 @@ _Default: inactive = False_
 from hdforce import GetAthletes
 
 # returns all athletes, including inactive
-players = GetAthletes(inactive = True)
+players = GetAthletes(includeInactive = True)
 # Find Lauren Green
 lg = players[players["name"] == "Lauren Green"]
 # Print lg table

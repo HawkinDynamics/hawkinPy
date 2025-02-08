@@ -71,7 +71,7 @@ While the purpose of the package is to help with accessing data specific to your
 ### Organization Specific Data
 Every organization has data specific to them. With that, these entities will have unique IDs. It is important to have these IDs available to make the most of your test calls.
 
-* `GetAthletes()` - Get the athletes for an account. Inactive players will only be included if `inactive` = True. The response will be a data frame containing the athletes that match this query.
+* `GetAthletes()` - Get the athletes for an account. Inactive players will only be included if `includeInactive` = True. The response will be a data frame containing the athletes that match this query.
 * `GetTeams()` - Get the team names and IDs for all the teams in the org. The response will be a data frame containing the teams that are in the organization.
 * `GetGroups()` - Get the group names and IDs for all the groups in the org. The response will be a data frame containing the groups that are in the organization.
 * `GetTags()` - Get the tag names, IDs, and descriptions for tags created by users in your org. The response will be a data frame.
@@ -119,7 +119,7 @@ types
 #### Get Athletes
 ``` Python
 # Get Athletes
-roster = hdforce.GetAthletes( inactive= False) # inactive is default to False
+roster = hdforce.GetAthletes( includeInactive= False) # includeInactive defaults to False
 
 # Athlete example
 roster[roster['name'] =="Lauren Green"]
