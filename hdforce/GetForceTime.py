@@ -155,7 +155,6 @@ def GetForceTime(testId: str) -> pd.DataFrame:
                 "displacement": displacement,
                 "power": power
             })
-            data.get("Time(s)",)
 
         # Setting attributes
         df.attrs['Test ID'] = data['id']

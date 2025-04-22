@@ -22,11 +22,11 @@ def GetTestsAth(athleteId: str, from_: int = None, to_: int = None, sync: bool =
     athleteId : str
         The unique identifier of the athlete whose tests are to be retrieved.
 
-    from_ : int, optional
-        Unix timestamp specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
+    from_ : int | str, optional
+        Unix timestamp (int) or string date (e.g., "YYYY-MM-DD") specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
 
-    to_ : int, optional
-        Unix timestamp specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
+    to_ : int | str, optional
+        Unix timestamp (int) or string date (e.g., "YYYY-MM-DD") specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
 
     sync : bool, optional
         If True, the function fetches updated and newly created tests to synchronize with the Hawkin database. Default is False.

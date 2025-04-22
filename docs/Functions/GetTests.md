@@ -4,9 +4,9 @@ __`GetTests(from_: int = None, to_: int = None, sync: bool = False, athleteId: s
 Get all test trials from an account. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
 
 ### Parameters
-__`from_`__: _(int)_ Unix timestamp specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
+__`from_`__: _(int | str)_ Unix timestamp or string date (e.g., "YYYY-MM-DD") specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
 
-__`to_`__: _(int)_ Unix timestamp specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
+__`to_`__: _(int | str)_ Unix timestamp or string date (e.g., "YYYY-MM-DD") specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
 
 __`sync`__: _(bool)_ If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
 
