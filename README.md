@@ -119,7 +119,8 @@ types
 #### Get Athletes
 ``` Python
 # Get Athletes
-roster = hdforce.GetAthletes( includeInactive= False) # includeInactive is default to False
+roster = hdforce.GetAthletes( includeInactive= False) # includeInactive defaults to False
+
 
 # Athlete example
 roster[roster['name'] =="Lauren Green"]
