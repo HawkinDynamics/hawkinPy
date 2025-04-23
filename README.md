@@ -1,4 +1,4 @@
-# HDFORCE v1.1.2 <img src="docs/img/hdlogo_sm.png" align="right" alt="" width="120" />
+# HDFORCE v1.1.3 <img src="docs/img/hdlogo_sm.png" align="right" alt="" width="120" />
 
 
 **Get your data from the Hawkin Dynamics API**
@@ -120,6 +120,7 @@ types
 ``` Python
 # Get Athletes
 roster = hdforce.GetAthletes( includeInactive= False) # includeInactive defaults to False
+
 
 # Athlete example
 roster[roster['name'] =="Lauren Green"]

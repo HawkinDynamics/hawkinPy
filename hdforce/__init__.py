@@ -19,3 +19,6 @@ from .GetAthletes import GetAthletes
 from .GetGroups import GetGroups
 from .GetTeams import GetTeams
 from .GetTags import GetTags
+
+# Load Metric Dictionary
+from .utils import Metrics

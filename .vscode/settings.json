@@ -3,7 +3,8 @@
         "changedate",
         "datetime",
         "hdlogo",
-        "mytests"
+        "mytests",
+        "pyjanitor"
     ],
     "python.testing.pytestArgs": [
         "tests"

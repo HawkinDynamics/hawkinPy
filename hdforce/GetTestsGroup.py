@@ -4,7 +4,7 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, ConfigManager, deprecated
+from .utils import responseHandler, logger, ConfigManager, deprecated, dtConverter
 from .AuthManager import AuthManager
 # Enable deprecation warnings globally
 import warnings
@@ -22,11 +22,11 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
     groupId : str
         A single group ID or a comma-separated string of group IDs to receive tests from specific groups.
 
-    from_ : int, optional
-        Unix timestamp specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
+    from_ : int | str, optional
+        Unix timestamp (int) or string date (e.g., "YYYY-MM-DD") specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
 
-    to_ : int, optional
-        Unix timestamp specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
+    to_ : int | str, optional
+        Unix timestamp (int) or string date (e.g., "YYYY-MM-DD") specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
 
     sync : bool, optional
         If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
@@ -112,17 +112,24 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
         logger.error("groupId must be a string or a tuple/list of strings.")
         raise ValueError("groupId must be a string or a tuple/list of strings.")
     
+    # Convert from_ and to_ to epoch timestamps
+    if from_ is not None:
+        from_ = dtConverter(from_)
+    if to_ is not None:
+        to_ = dtConverter(to_)
+
     # Evaluate from and to dates for Sync command
     if sync is True:
         if from_ is not None:
             query['syncFrom'] = from_
         if to_ is not None:
             query['syncTo'] = to_
-    elif sync is False:
+    else:
         if from_ is not None:
             query['from'] = from_
         if to_ is not None:
             query['to'] = to_
+
 
     # Log request
     if from_ is not None and to_ is not None:
@@ -160,6 +167,11 @@ def GetTestsGroup(groupId: str, from_: int = None, to_: int = None, sync: bool =
         df.attrs['Last Sync'] = int(data['lastSyncTime'])
         df.attrs['Last Test Time'] = int(data['lastTestTime'])
         df.attrs['Count'] = int(data['count'])
+
+        # Add Last Sync column
+        last_sync_time = int(data['lastSyncTime'])
+        df['last_sync_time'] = last_sync_time
+        
         logger.info(f"Request successful. Returned {df.attrs['Count']} tests from Groups: {groupId}.")
         return df
 

@@ -4,7 +4,7 @@ import os
 import datetime
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, ConfigManager, deprecated
+from .utils import responseHandler, logger, ConfigManager, deprecated, dtConverter
 from .AuthManager import AuthManager
 # Enable deprecation warnings globally
 import warnings
@@ -22,11 +22,11 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
     typeId : str
         The canonical test ID, test type name, or test name abbreviation. Must correspond to known test types.
 
-    from_ : int, optional
-        Unix timestamp specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
+    from_ : int | str, optional
+        Unix timestamp (int) or string date (e.g., "YYYY-MM-DD") specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
 
-    to_ : int, optional
-        Unix timestamp specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
+    to_ : int | str, optional
+        Unix timestamp (int) or string date (e.g., "YYYY-MM-DD") specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
 
     sync : bool, optional
         If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
@@ -101,17 +101,24 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
     # Create blank Query list to handle parameters
     query = {}
 
+    # Convert from_ and to_ to epoch timestamps
+    if from_ is not None:
+        from_ = dtConverter(from_)
+    if to_ is not None:
+        to_ = dtConverter(to_)
+
     # Evaluate from and to dates for Sync command
     if sync is True:
         if from_ is not None:
             query['syncFrom'] = from_
         if to_ is not None:
             query['syncTo'] = to_
-    elif sync is False:
+    else:
         if from_ is not None:
             query['from'] = from_
         if to_ is not None:
             query['to'] = to_
+
 
     # Check typeId
     type_ids = {
@@ -183,6 +190,11 @@ def GetTestsType(typeId: str, from_: int = None, to_: int = None, sync: bool = F
         df.attrs['Last Sync'] = int(data['lastSyncTime'])
         df.attrs['Last Test Time'] = int(data['lastTestTime'])
         df.attrs['Count'] = int(data['count'])
+
+        # Add Last Sync column
+        last_sync_time = int(data['lastSyncTime'])
+        df['last_sync_time'] = last_sync_time
+        
         logger.info(f"Request successful. Returned {df.attrs['Count']} {df.attrs['Test Type Name']} tests.")
         return df
 

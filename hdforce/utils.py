@@ -1,6 +1,7 @@
 # Dependencies
 import pandas as pd
 from pandas import json_normalize
+from janitor import clean_names
 import requests
 import datetime
 import os
@@ -9,6 +10,59 @@ from .LoggerConfig import LoggerConfig
 
 # Get a logger specific to this module
 logger = LoggerConfig.get_logger(__name__)
+
+# -------------------- #
+# EPOCH Converter
+# Helper function to convert dates
+
+
+def dtConverter(date_value):
+    """
+    Converts a date string in 'YYYY-MM-DD' format or an integer epoch to an epoch timestamp.
+
+    Parameters:
+    -----------
+    date_value : str or int
+        The date value to convert.
+
+    Returns:
+    --------
+    int
+        The epoch timestamp.
+    """
+    if isinstance(date_value, int):
+        return date_value  # Already in epoch format
+    elif isinstance(date_value, str):
+        try:
+            dt = datetime.datetime.strptime(date_value, '%Y-%m-%d')
+            return int(dt.timestamp())  # Convert to epoch
+        except ValueError:
+            logger.error(f"Invalid date format: {date_value}. Use 'YYYY-MM-DD' or epoch.")
+            raise ValueError("Invalid date format. Use 'YYYY-MM-DD' or epoch.")
+    else:
+        logger.error(f"Unsupported date format: {date_value}")
+        raise TypeError("Date must be an integer (epoch) or a string in 'YYYY-MM-DD' format.")
+
+
+
+# -------------------- #
+# Metric Dictionary
+
+
+class Metrics:
+    metric_dictionary = None
+
+    @classmethod
+    def MetricDictionary(cls):
+        # Load the DataFrame once during package initialization, if not already loaded
+        if cls.metric_dictionary is None:
+            DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data', 'MetricDictionary.parquet')
+            try:
+                cls.metric_dictionary = pd.read_parquet(DATA_FILE_PATH)
+            except FileNotFoundError:
+                raise FileNotFoundError(f"Could not find the Parquet file at {DATA_FILE_PATH}")
+        return cls.metric_dictionary
+
 
 # -------------------- #
 # Configuration Manager
@@ -115,6 +169,9 @@ class TokenManager:
     region : str
         The geographic region associated with the API endpoint. Defaults to "Americas", with other options being "Europe" and "Asia/Pacific".
 
+    orgName : str
+        The tech support provided organization name and endpoint to access custom features that were requested by the user
+
     Attributes
     ----------
     refreshToken : str
@@ -122,6 +179,9 @@ class TokenManager:
 
     region : str
         Stores the region.
+
+    orgName : str
+        Stores org endpoint to use.
 
     accessToken : str or None
         Stores the current access token.
@@ -136,9 +196,10 @@ class TokenManager:
         Stores the base URL for the API corresponding to the region.
     """
     # Class attributes
-    def __init__(self, refreshToken, region, fileName):
+    def __init__(self, refreshToken, region, orgName=None, fileName=None):
         self.refreshToken = refreshToken
         self.region = region
+        self.orgName = orgName or "dev"  # Default to 'dev' if no orgName is provided
         self.accessToken = None
         self.ExpirationVal = None
         self.ExpirationStr = None
@@ -157,11 +218,13 @@ class TokenManager:
         }.get(self.region, "https://cloud.dev.hawkindynamics.com/api/token")
 
         # Set Cloud URL
-        self.url_cloud = {
-            "Americas": "https://cloud.hawkindynamics.com/api/dev",
-            "Europe": "https://eu.cloud.hawkindynamics.com/api/dev",
-            "Asia/Pacific": "https://apac.cloud.hawkindynamics.com/api/dev"
-        }.get(self.region, "https://cloud.dev.hawkindynamics.com/api/dev")
+        base_url = {
+            "Americas": "https://cloud.hawkindynamics.com/api",
+            "Europe": "https://eu.cloud.hawkindynamics.com/api",
+            "Asia/Pacific": "https://apac.cloud.hawkindynamics.com/api"
+        }.get(self.region, "https://cloud.dev.hawkindynamics.com/api")
+
+        self.url_cloud = f"{base_url}/{self.orgName}"  # Append orgName to URL
 
         # Set auth headers
         headers = {"Authorization": f"Bearer {self.refreshToken}"}
@@ -209,35 +272,54 @@ def responseHandler(json_data):
 
     """
     # 1 - Create normalized DataFrame
-    dfAll = json_normalize(json_data['data'], errors='ignore')
-        
+    dfAll = pd.json_normalize(json_data['data'], errors='ignore')
 
-    # 2 - Remove athlete and testType columns
+    # Step 2 - Remove athlete and testType columns
     # 2.1 - Generate a list of columns to drop
     columns_to_drop = [col for col in dfAll.columns if col.startswith('testType') or col.startswith('athlete')]
 
     # 2.2 - Drop the columns from the DataFrame
     dfAll.drop(columns=columns_to_drop, inplace=True)
 
+    # 2.3 Clean metric names using janitor
+    # Separate columns 'id', 'timestamp', 'segment', and 'active' into a new DataFrame
+    columns_to_separate = ['id', 'timestamp', 'segment', 'active']
+    df_selected = dfAll[columns_to_separate]  # DataFrame with the selected columns
+
+    # DataFrame with the remaining columns
+    df_metrics = dfAll.drop(columns=columns_to_separate)
+
+    # Use janitor to clean column names in snake_case
+    df_metrics = df_metrics.clean_names(remove_special=True)
+
+    # Strip trailing underscores from column names
+    df_metrics.columns = df_metrics.columns.str.rstrip('_')
+
+    # Rejoin the cleaned metric DataFrame with the selected columns
+    dfAll = df_selected.join(df_metrics)
+
+    # 3 - Deduplicate columns
+    dfAll = dfAll.loc[:, ~dfAll.columns.duplicated()]
+
     # 3.1 - Create DataFrame of athlete and testType info
     infoDF = pd.json_normalize(
-            json_data['data'],
-            meta=[
-                'id',
-                ['athlete', 'id'],
-                ['athlete', 'name'],
-                ['athlete', 'teams'],
-                ['athlete', 'groups'],
-                ['athlete', 'active'],
-                ['testType', 'id'],
-                ['testType', 'name'],
-                ['testType', 'canonicalId']
-            ], errors='ignore'
-        )
+        json_data['data'],
+        meta=[
+            'id',
+            ['athlete', 'id'],
+            ['athlete', 'name'],
+            ['athlete', 'teams'],
+            ['athlete', 'groups'],
+            ['athlete', 'active'],
+            ['testType', 'id'],
+            ['testType', 'name'],
+            ['testType', 'canonicalId']
+        ], errors='ignore'
+    )
 
     # 4.3 - Create DataFrame of tags column from infoDF
     tags = pd.DataFrame(infoDF["testType.tags"])
-    
+
     # 3.2 - Extract only athlete and testType data
     selected_columns = infoDF.columns[infoDF.columns.astype(str).str.startswith('athlete') | infoDF.columns.astype(str).str.startswith('testType')]
 
@@ -253,10 +335,7 @@ def responseHandler(json_data):
     def extract_names(tags):
         return [tag['name'] for tag in tags if 'name' in tag]
 
-    # 4.3 - Create DataFrame of tags column from infoDF
-        tags = pd.DataFrame(infoDF["testType.tags"])
-
-    # 4.4 - Apply these functions to create new columns in tags
+    # 4.3 - Apply these functions to create new columns in tags
     tags['tag_ids'] = tags['testType.tags'].apply(extract_ids)
     tags['tag_names'] = tags['testType.tags'].apply(extract_names)
 
@@ -303,8 +382,12 @@ def responseHandler(json_data):
     # 12 - change "athlete_external_" to "external_" in column names
     df.columns = [col.replace('athlete_external_', 'external_') for col in df.columns]
 
-    return df
+    # 13 - Ensure all "external_" columns are strings
+    external_columns = [col for col in df.columns if col.startswith("external_")]
+    for col in external_columns:
+        df[col] = df[col].astype(str)
 
+    return df
 
 # -------------------- #
 # Deprecation Decorator

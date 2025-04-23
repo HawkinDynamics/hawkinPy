@@ -1,12 +1,14 @@
-site_name: hdforce v1.1.2 by Hawkin Dynamics
+site_name: hdforce v1.1.3 by Hawkin Dynamics
 nav:
   - Home: index.md
   - User Guide:
     - Authentication: UserGuide/EnvSetUp.md
     - Get Your Data: UserGuide/GetData.md
     - Example Usage: UserGuide/Examples.md
+    - Creating A Local Database: UserGuide/LocalDatabase.md
   - Function:
     - AuthManager: Functions/AuthManager.md
+    - BuildDB: Functions/BuildDB.md
     - CreateAthletes: Functions/CreateAthletes.md
     - LoggerConfig: Functions/LoggerConfig.md
     - GetMetrics: Functions/GetMetrics.md
@@ -21,6 +23,7 @@ nav:
     - GetTestsTeams: Functions/GetTestsTeam.md
     - GetTestsGroups: Functions/GetTestsGroup.md
     - GetForceTime: Functions/GetForceTime.md
+    - SyncDB: Functions/SyncDB.md
     - UpdateAthletes: Functions/UpdateAthletes.md
   - About:
     - Changelog: About/changelog.md
@@ -79,4 +82,4 @@ markdown_extensions:
 
 
 copyright: |
-  &copy; 2024 <a href="https://www.hawkindynamics.com/" target="_blank" rel="noopener">Hawkin Dynamics</a>
+  &copy; 2025 <a href="https://www.hawkindynamics.com/" target="_blank" rel="noopener">Hawkin Dynamics</a>
