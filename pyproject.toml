@@ -1,41 +1,34 @@
 [tool.poetry]
 name = "hdforce"
-version= "1.1.3"
+version = "0.0.0" # Managed by tags
 description = "Get your data from the Hawkin Dynamics API"
 authors = ["laureng-hd <lauren@hawkindynamics.com>"]
 readme = "README.md"
-keywords = ["hawkin", "force plates", "sports science"]
 homepage = "https://www.hawkindynamics.com/"
 repository = "https://github.com/HawkinDynamics/hawkinPy"
 documentation = "https://hawkindynamics.github.io/hawkinPy/"
-classifiers = [
-  "Development Status :: 5 - Production/Stable",
-  "Intended Audience :: Developers",
-  "Topic :: Software Development :: Build Tools",
-  "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-]
-
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.10,<4.0"
 pandas = "^2.2.0"
 python-dotenv = "^1.0.1"
-requests = "^2.31.0"
-pytest = "^8.2.0"
-flake8 = "^7.0.0"
+requests = "^2.33.0"
 pydantic = "^2.0.0" 
 pyarrow = "^18.1.0"
 pyjanitor = "^0.30.0"
 
 [tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0" # Moved to dev
+flake8 = "^7.0.0" # Moved to dev
 ipykernel = "^6.29.4"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"
+pattern-prefix = "py-v" # Matches your monorepo tag strategy
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+# Added dynamic-versioning to requirements for better install compatibility
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0"]
+build-backend = "poetry.dynamic_versioning.backend"
