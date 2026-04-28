@@ -4,11 +4,8 @@ from .LoggerConfig import LoggerConfig
 
 # From Get Tests
 from .GetForceTime import GetForceTime
+from .GetForceTimeBulk import GetForceTimeBulk
 from .GetTests import GetTests
-from .GetTestsAth import GetTestsAth
-from .GetTestsGroup import GetTestsGroup
-from .GetTestsTeam import GetTestsTeam
-from .GetTestsType import GetTestsType
 
 # From Hawkin Data
 from .GetMetrics import GetMetrics
@@ -19,6 +16,10 @@ from .GetAthletes import GetAthletes
 from .GetGroups import GetGroups
 from .GetTeams import GetTeams
 from .GetTags import GetTags
+
+# From Athlete Management
+from .CreateAthletes import CreateAthletes
+from .UpdateAthletes import UpdateAthletes
 
 # Load Metric Dictionary
 from .utils import Metrics

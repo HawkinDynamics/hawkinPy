@@ -44,7 +44,6 @@ def dtConverter(date_value):
         raise TypeError("Date must be an integer (epoch) or a string in 'YYYY-MM-DD' format.")
 
 
-
 # -------------------- #
 # Metric Dictionary
 
@@ -56,7 +55,8 @@ class Metrics:
     def MetricDictionary(cls):
         # Load the DataFrame once during package initialization, if not already loaded
         if cls.metric_dictionary is None:
-            DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data', 'MetricDictionary.parquet')
+            DATA_FILE_PATH = os.path.join(os.path.dirname(
+                __file__), 'data', 'MetricDictionary.parquet')
             try:
                 cls.metric_dictionary = pd.read_parquet(DATA_FILE_PATH)
             except FileNotFoundError:
@@ -167,10 +167,13 @@ class TokenManager:
         The refresh token used to obtain access tokens.
 
     region : str
-        The geographic region associated with the API endpoint. Defaults to "Americas", with other options being "Europe" and "Asia/Pacific".
+        The geographic region associated with the API endpoint.
+        Defaults to "Americas", with other options being
+        "Europe" and "Asia/Pacific".
 
     orgName : str
-        The tech support provided organization name and endpoint to access custom features that were requested by the user
+        The tech support provided organization name and endpoint
+        to access custom features that were requested by the user
 
     Attributes
     ----------
@@ -190,16 +193,18 @@ class TokenManager:
         Stores the expiration time of the current access token as an int
 
     ExpirationStr : datetime.datetime or None
-        Stores the expiration time of the current access token as an timestamp
+        Stores the expiration time of the current access token
+        as a timestamp
 
     url_cloud : str or None
         Stores the base URL for the API corresponding to the region.
     """
     # Class attributes
+
     def __init__(self, refreshToken, region, orgName=None, fileName=None):
         self.refreshToken = refreshToken
         self.region = region
-        self.orgName = orgName or "dev"  # Default to 'dev' if no orgName is provided
+        self.orgName = orgName or "v1"  # API version prefix; matches /api/v1/* spec
         self.accessToken = None
         self.ExpirationVal = None
         self.ExpirationStr = None
@@ -214,14 +219,16 @@ class TokenManager:
         url_token = {
             "Americas": "https://cloud.hawkindynamics.com/api/token",
             "Europe": "https://eu.cloud.hawkindynamics.com/api/token",
-            "Asia/Pacific": "https://apac.cloud.hawkindynamics.com/api/token"
+            "Asia/Pacific": "https://apac.cloud.hawkindynamics.com/api/token",
+            "Development": "https://cloud.dev.hawkindynamics.com/api/token"
         }.get(self.region, "https://cloud.dev.hawkindynamics.com/api/token")
 
         # Set Cloud URL
         base_url = {
             "Americas": "https://cloud.hawkindynamics.com/api",
             "Europe": "https://eu.cloud.hawkindynamics.com/api",
-            "Asia/Pacific": "https://apac.cloud.hawkindynamics.com/api"
+            "Asia/Pacific": "https://apac.cloud.hawkindynamics.com/api",
+            "Development": "https://cloud.dev.hawkindynamics.com/api"
         }.get(self.region, "https://cloud.dev.hawkindynamics.com/api")
 
         self.url_cloud = f"{base_url}/{self.orgName}"  # Append orgName to URL
@@ -241,12 +248,13 @@ class TokenManager:
             if int(datetime.datetime.timestamp(datetime.datetime.now())) >= self.ExpirationVal:
                 logger.debug(f"Fail |Access token expired: {self.ExpirationVal}")
             else:
-                logger.debug(f"Pass | Access token retrieved successfully. Expires: {self.ExpirationVal}")
+                logger.debug(
+                    f"Pass | Access token retrieved successfully. Expires: {self.ExpirationVal}")
         else:  # error
             error_msg = {
                 401: "Error 401: Refresh Token is invalid or expired.",
                 403: "Error 403: Refresh Token is missing",
-                500: "Error 500: Something went wrong. Please contact support@hawkindynamics.com"
+                500: "Error 500: Something went wrong. Please contact dev-team@hawkindynamics.com"
             }.get(response.status_code, f"Unexpected response code: {response.status_code}")
             logger.error(error_msg)
             raise ValueError(error_msg)
@@ -276,14 +284,20 @@ def responseHandler(json_data):
 
     # Step 2 - Remove athlete and testType columns
     # 2.1 - Generate a list of columns to drop
-    columns_to_drop = [col for col in dfAll.columns if col.startswith('testType') or col.startswith('athlete')]
+    columns_to_drop = [col for col in dfAll.columns if col.startswith(
+        'testType') or col.startswith('athlete')]
 
     # 2.2 - Drop the columns from the DataFrame
     dfAll.drop(columns=columns_to_drop, inplace=True)
 
     # 2.3 Clean metric names using janitor
-    # Separate columns 'id', 'timestamp', 'segment', and 'active' into a new DataFrame
+    # Separate columns 'id', 'timestamp', 'segment', and 'active' into a new DataFrame.
+    # When the API filters to active-only tests (includeInactive=False), the 'active'
+    # field is omitted from the response — fill it with True so downstream callers
+    # see a consistent schema regardless of the filter used.
     columns_to_separate = ['id', 'timestamp', 'segment', 'active']
+    if 'active' not in dfAll.columns:
+        dfAll['active'] = True
     df_selected = dfAll[columns_to_separate]  # DataFrame with the selected columns
 
     # DataFrame with the remaining columns
@@ -321,7 +335,8 @@ def responseHandler(json_data):
     tags = pd.DataFrame(infoDF["testType.tags"])
 
     # 3.2 - Extract only athlete and testType data
-    selected_columns = infoDF.columns[infoDF.columns.astype(str).str.startswith('athlete') | infoDF.columns.astype(str).str.startswith('testType')]
+    selected_columns = infoDF.columns[infoDF.columns.astype(str).str.startswith(
+        'athlete') | infoDF.columns.astype(str).str.startswith('testType')]
 
     # 3.3 Narrow down the DataFrame
     infoDF = infoDF[selected_columns]
@@ -390,27 +405,56 @@ def responseHandler(json_data):
     return df
 
 # -------------------- #
-# Deprecation Decorator
+# Token Refresh Helper
 
-import warnings
-import functools
 
-def deprecated(reason):
+def ensure_token():
+    """Validate the current access token and refresh if expired.
+
+    Returns
+    -------
+    str
+        A valid access token for API requests.
+
+    Raises
+    ------
+    Exception
+        If no access token is found or authentication fails.
     """
-    Decorator to mark functions as deprecated.
-    
-    Args:
-        reason (str): The reason why the function is deprecated and what to use instead.
-    """
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            warnings.warn(
-                f"Function {func.__name__} is deprecated: {reason}",
-                category=DeprecationWarning,
-                stacklevel=2
-            )
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+    from .AuthManager import AuthManager
+    import datetime
 
+    a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
+    tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
+    nowtime = datetime.datetime.timestamp(datetime.datetime.now())
+
+    if a_token is None:
+        logger.error("No Access Token found.")
+        raise Exception("No Access Token found.")
+
+    if int(nowtime) >= tokenExp:
+        logger.debug("Token expired. Refreshing...")
+        AuthManager(
+            region=ConfigManager.region,
+            authMethod=ConfigManager.env_method,
+            refreshToken_name=ConfigManager.token_name,
+            refreshToken=ConfigManager.refresh_token,
+            env_file_name=ConfigManager.file_name
+        )
+        a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
+        tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
+        if a_token is None:
+            raise Exception("No Access Token after refresh.")
+        if int(nowtime) >= tokenExp:
+            raise Exception("Token still expired after refresh.")
+        logger.debug(
+            f"Token refreshed. Valid through: "
+            f"{datetime.datetime.fromtimestamp(tokenExp)}"
+        )
+    else:
+        logger.debug(
+            f"Access Token valid. Expires: "
+            f"{datetime.datetime.fromtimestamp(tokenExp)}"
+        )
+
+    return a_token

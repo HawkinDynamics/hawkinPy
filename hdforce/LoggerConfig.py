@@ -1,11 +1,12 @@
 import logging
 
+
 class LoggerConfig:
     @staticmethod
     def Configure(level='info', file=False, file_path='hdforce.log', file_mode='a'):
         """
         Configures the logging for the entire application.
-        
+
         Parameters:
         - level: Logging level as a string ('debug', 'info', 'warning', 'error', 'critical').
         - file: Boolean to determine if logging to a file should be enabled.
@@ -22,7 +23,8 @@ class LoggerConfig:
                 logger.removeHandler(handler)
 
         # Create formatter
-        formatter = logging.Formatter('%(asctime)s - %(module)s - %(funcName)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter(
+            '%(asctime)s - %(module)s - %(funcName)s - %(levelname)s - %(message)s')
 
         # Optionally add a file handler
         if file:
@@ -41,10 +43,10 @@ class LoggerConfig:
     def get_logger(module_name):
         """
         Retrieve a logger for a specific module.
-        
+
         Parameters:
         - module_name: Name of the module requesting the logger.
-        
+
         Returns:
         - Configured Logger object.
         """

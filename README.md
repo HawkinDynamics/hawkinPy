@@ -1,4 +1,4 @@
-# HDFORCE v1.1.3 <img src="docs/img/hdlogo_sm.png" align="right" alt="" width="120" />
+# HDFORCE <img src="docs/img/hc-logo.png" align="right" alt="Hawkin Connect" width="120" />
 
 
 **Get your data from the Hawkin Dynamics API**
@@ -14,7 +14,7 @@
 
 ## How To Use The HDFORCE Package
 
-HDFORCE provides simple functionality with Hawkin Dynamics API. These functions are for use with ‘Hawkin Dynamics Beta API’ version 1.10-beta. You must be a Hawkin Dynamics user with an active integration account to utilize functions within the package.
+HDFORCE provides simple functionality with Hawkin Dynamics API. These functions are for use with the Hawkin Dynamics API (spec v1.13+). You must be a Hawkin Dynamics user with an active integration account to utilize functions within the package.
 
 ## Functions
 This API is designed to get data out of your Hawkin Dynamics server and interact with your data more intimately. It is not designed to be accessed from client applications directly. There is a limit on the amount of data that can be returned in a single request (256 MB). As your database grows, it will be necessary to use the `from_` and `to_` parameters to limit the size of the responses. Responses that exceed the memory limit will timeout and fail. It is advised that you design your client to handle this from the beginning. A recommended pattern would be to have two methods of fetching data. A scheduled pull that uses the `from_` and `to_` parameters to constrain the returned data to only tests that have occurred since the last fetch e.g. every day or every 5 minutes. And then a pull that fetches the entire database since you began testing that is only executed when necessary. A recommended way of doing this is to generate the `from_` and `to_` parameters for each month since you started and send a request for each either in parallel or sequentially.
@@ -86,15 +86,14 @@ value you will receive every test. This parameter is best suited for bulk export
 you will receive every test from the beginning of time or the optionally supplied `from_`
 parameter. This parameter is best suited for bulk exports of historical data
 * `sync` = The result set will include updated and newly created tests, following the time constraints of `from_` and `to_`. This parameter is best suited to keep your database in sync with the Hawkin database. It cannot and should not be used to fetch your entire database. A recommended strategy would be to have a job that runs on a short interval e.g. every five minutes that sends the `lastSyncTime` that it received as the `from_` parameter with `sync=True`.
-* `active` = If True, only active tests are fetched. If False, all tests including inactive ones are fetched. The default is set to True.
+* `includeInactive` = If False (default), only active tests are returned. Set to True to include inactive (disabled) trials in the result set.
 
 #### Get Test Function
-* `GetTests()` - Get the tests for your account. You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). The Response will be a data frame containing the trials within the time range (if specified).
-* `GetTestsAth()` - Get only tests of the specified athlete from your organization. You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from the athlete, within the time range (if specified).
-* `GetTestsType()` - Get only tests of the specified test type from your organization. You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from that test type, within the time range (if specified).
-* `GetTestsTeam()` - Get only tests of the specified teams from your organization. Requires a `teamId` argument, which expects a text string, list or tuple (max of 10 teams). You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from those teams, within the time range (if specified).
-* `GetTestsGroup()` - Get only tests of the specified groups from your organization. Requires a `groupId` argument, which expects a text string, list or tuple (max of 10 groups). You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from those groups, within the time range (if specified).
+* `GetTests()` - Get the tests for your account. You can filter by `athleteId`, `typeId`, `teamId` (single or comma-separated list, max 10), or `groupId` (single or comma-separated list, max 10). You can also specify a time frame via `from_` / `to_` (or `sync=True` for incremental sync). Response will be a DataFrame containing the matching trials.
 * `GetForceTime()` - Get the force-time data for a specific test by id. This includes both left, right and combined force data at 1000hz (per millisecond). Calculated velocity, displacement, and power at each time interval will also be included.
+* `GetForceTimeBulk()` - Batch retrieval of force-time data for multiple test IDs. Supports optional export to csv, json, or parquet, plus de-identification of athlete fields.
+
+*Note: the legacy `GetTestsAth`, `GetTestsType`, `GetTestsTeam`, and `GetTestsGroup` helpers were deprecated in hdforce v1.x and removed in v2.0.0. Use `GetTests()` with the corresponding `athleteId`, `typeId`, `teamId`, or `groupId` argument instead.*
 
 ## Examples
 This is a basic example that shows a common workflow:

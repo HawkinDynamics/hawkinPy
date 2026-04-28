@@ -14,7 +14,7 @@ def GetMetrics(test_type=None) -> pd.DataFrame:
     -----------
     test_type : str
         Designate which test metrics to be called
-    
+
     Returns
     -------
     pd.DataFrame
@@ -29,7 +29,7 @@ def GetMetrics(test_type=None) -> pd.DataFrame:
     """
     # Use the globally loaded metric_dictionary DataFrame
     df = Metrics.MetricDictionary()
-    
+
     # Check typeId
     type_ids = {
         "7nNduHeM5zETPjHxvm7s": ["7nNduHeM5zETPjHxvm7s", "Countermovement Jump", "CMJ"],
@@ -54,4 +54,3 @@ def GetMetrics(test_type=None) -> pd.DataFrame:
         df = df
 
     return df
-

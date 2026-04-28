@@ -1,4 +1,4 @@
-![HDlogo](../img/HDBlack_Horizontal.png)
+![Hawkin Connect](../img/hc-banner.png)
 ## Package Development
 
 #### Authors
@@ -18,7 +18,7 @@ Westbrook, ME 04092
 +1 207 405 9142
 
 #### Email
-support@hawkindynamics.com
+dev-team@hawkindynamics.com
 
 
 

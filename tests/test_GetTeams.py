@@ -1,16 +1,18 @@
 import pytest
 from hdforce.AuthManager import AuthManager
 from hdforce.GetTeams import GetTeams
-import pandas as pd 
+import pandas as pd
 
 # successful call with file
+
+
 def test_GetTeams_file():
-    
+
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env", region="Development")
     # Call for teams
     data = GetTeams()
-    
+
     # Check response is DataFrame
     assert isinstance(data, pd.DataFrame)
     assert isinstance(data.attrs['Count'], int)
@@ -18,9 +20,9 @@ def test_GetTeams_file():
 
 # successful call with env
 def test_GetTeams_env():
-    
+
     # Authenticate
-    AuthManager()
+    AuthManager(region="Development")
     # Call for teams
     data = GetTeams()
 

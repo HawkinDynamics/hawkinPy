@@ -3,19 +3,19 @@ import pytest
 import pandas as pd
 from hdforce import AuthManager, GetAthletes, GetMetrics
 
+
 def test_dev_api_workflow():
     """
-    Functional test to verify Auth -> GetAthletes -> GetMetrics workflow 
+    Functional test to verify Auth -> GetAthletes -> GetMetrics workflow
     against the development API.
     """
-    # 1. Authenticate using the Dev API trigger
-    # region="dev" forces TokenManager to use https://cloud.dev.hawkindynamics.com/api
+    # 1. Authenticate against the Dev API
+    # region="Development" routes requests to https://cloud.dev.hawkindynamics.com/api
     try:
         AuthManager(
             authMethod="env",
             refreshToken_name="HD_REFRESH_TOKEN",
-            region="dev", 
-            orgName="dev" # Adjust if your dev org slug is different
+            region="Development"
         )
     except Exception as e:
         pytest.fail(f"Authentication failed against Dev API: {e}")
@@ -32,13 +32,14 @@ def test_dev_api_workflow():
     # 3. Test GetMetrics
     try:
         # Fetching a small window of data to verify the pipe
-        metrics = GetMetrics(start='2024-01-01', end='2024-01-02')
+        metrics = GetMetrics()
         assert isinstance(metrics, pd.DataFrame), "GetMetrics should return a DataFrame"
         print("Successfully validated metrics retrieval pipeline.")
     except Exception as e:
-        # We don't fail if empty (might be no data for that date), 
+        # We don't fail if empty (might be no data for that date),
         # but we fail if the request itself breaks.
         print(f"Metrics request completed with status: {e}")
+
 
 if __name__ == "__main__":
     # Allows running the script directly

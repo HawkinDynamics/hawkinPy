@@ -2,6 +2,8 @@ from typing import List, Dict
 from pydantic import BaseModel
 
 # Athlete Class
+
+
 class NewAthlete(BaseModel):
     # Required
     name: str
@@ -13,6 +15,8 @@ class NewAthlete(BaseModel):
 
 # -------------------- #
 # Athlete Class
+
+
 class Athlete(BaseModel):
     # Required
     id: str
@@ -25,24 +29,32 @@ class Athlete(BaseModel):
 
 # -------------------- #
 # Team Class
+
+
 class Team(BaseModel):
     name: str
     id: str
 
 # -------------------- #
 # Group Class
+
+
 class Group(BaseModel):
     name: str
     id: str
 
 # -------------------- #
 # Test Type Class
+
+
 class TestType(BaseModel):
     name: str
     id: str
 
 # -------------------- #
 # Tags Class
+
+
 class Tag(BaseModel):
     name: str
     id: str
@@ -51,9 +63,10 @@ class Tag(BaseModel):
 # -------------------- #
 # AthleteResult Class
 # AthleteResult Class
+
+
 class AthleteResult(BaseModel):
     name: str
     successful: bool
     id: str
     reason: List[str] = []
-    

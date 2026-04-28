@@ -4,6 +4,7 @@ import pandas as pd
 # -------------------- #
 # Get Test Types
 
+
 def GetTypes() -> pd.DataFrame:
     """Get the test type names and IDs.
 

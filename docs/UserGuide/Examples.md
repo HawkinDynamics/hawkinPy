@@ -94,8 +94,8 @@ newTests = GetTests(from_ = lastSync , sync = True)
 ```
 
 **Get Tests by Athlete**
-``` Python title="Get Tests of specific types, athletes, teams, and groups"
-from hdforce import GetTestsAth, GetTestsType, GetTestsGroup, GetTestsTeam
+``` Python title="Get tests for a specific athlete"
+from hdforce import GetTests
 
 # Set from and to time points
 time1 = 1690859091
@@ -106,22 +106,22 @@ me = players.id[players["name"] == "Lauren Green"] # Get my athlete info from pl
 
 myId = me.iloc[0] # Get my id
 
-myTests = GetTestsAth(athleteId = myId) # Get my tests
+myTests = GetTests(athleteId = myId) # Get my tests
 ```
 
 **Get Tests by Type**
 ``` Python title="Sync CMJ Tests Since Time2"
-# get CMJ tests since time2
-updateCMJ = GetTestsType(typeId = 'Countermovement Jump', from_ = time2, sync = True)
+# get CMJ tests updated since time2
+updateCMJ = GetTests(typeId = 'Countermovement Jump', from_ = time2, sync = True)
 ```
 
 **Get Group Test Up to time 1**
 ```Python title="Group1 Tests up to Time1"
 theGroup = groups.id[groups["name"] == "group1"]
-groupTests = GetTestsGroup(groupId = theGroup, to_ = time1)
+groupTests = GetTests(groupId = theGroup, to_ = time1)
 ```
 
-**Get Team Test from time2**
+**Get Team Tests from time2**
 ``` Python title="Teams 1,2,3 from time 2"
 # Specify the team names you want to find indices for
 team_names = ['Team 1', 'Team 3', 'Team 6']
@@ -130,14 +130,15 @@ team_names = ['Team 1', 'Team 3', 'Team 6']
 indices = teams[teams['name'].isin(team_names)].index.tolist()
 
 # Select the team IDs using iloc
-teamIds = teams.iloc[indices]['id']
+teamIds = teams.iloc[indices]['id'].tolist()
 
-teamTests = GetTestsTeam(teamId = teamIds, from_ = time2)
+# GetTests accepts a list of team IDs (max 10) and joins them comma-separated for the API
+teamTests = GetTests(teamId = teamIds, from_ = time2)
 ```
 
 **Get Force-Time Data**
 ``` Python title="My First Test Force-Time Data"
-from hdforce import GetTestsAth, GetForceTime
+from hdforce import GetTests, GetForceTime
 
 # Get my athlete info from players variable
 me = players.id[players["name"] == "Lauren Green"]
@@ -146,7 +147,7 @@ me = players.id[players["name"] == "Lauren Green"]
 myId = me.iloc[0]
 
 # Get my tests
-myTests = GetTestsAth(athleteId = myId)
+myTests = GetTests(athleteId = myId)
 
 # Get test trial id of first test
 someTest = myTests.iloc[0]

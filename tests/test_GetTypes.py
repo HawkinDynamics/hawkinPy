@@ -1,13 +1,15 @@
 import pytest
 from hdforce.AuthManager import AuthManager
 from hdforce.GetTypes import GetTypes
-import pandas as pd 
+import pandas as pd
 
 # successful call with file
+
+
 def test_GetTypes_file():
 
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env", region="Development")
     # Call for test types
     data = GetTypes()
 
@@ -19,7 +21,7 @@ def test_GetTypes_file():
 def test_GetTypes_env():
 
     # Authenticate
-    AuthManager()
+    AuthManager(region="Development")
     # Call for metrics
     data = GetTypes()
 

@@ -31,13 +31,8 @@ parameter. This parameter is best suited for bulk exports of historical data
 
 #### Get Test Function
 
-> As of July 10, 2024, `GetTestsAth`, `GetTestsType`, `GetTestsTeam`, and `GetTestsGroup` 
-> have been deprecated for the preferred use of `GetTests`. This function will be fully 
-> superseded Jan 01, 2025 12:00:00.
+* `GetTests()` - The primary function to retrieve tests. Accepts `from_`, `to_`, `sync`, `includeInactive`, `athleteId`, `typeId`, `teamId`, and `groupId`. Only one entity filter (`athleteId`, `typeId`, `teamId`, or `groupId`) can be used per call. Any of these filters can be combined with `from_` / `to_` / `sync` / `includeInactive`.
+* `GetForceTime()` - Get the force-time data for a specific test by id. This includes left, right and combined force data at 1000hz (per millisecond). Calculated velocity, displacement, and power at each time interval will also be included.
+* `GetForceTimeBulk()` - Batch retrieval of force-time data for multiple test IDs, with optional export to csv, json, or parquet.
 
-* `GetTests()` - The primary function to call tests is `get_tests`. This is a base request for tests that, as of 2024-07-10, accepts all arguments : 'from', 'to', 'sync', 'includeInactive', 'athleteId', 'testTypeId', 'teamId', and 'groupId'. Using this function, you have complete control of the tests being requested from the cloud. It is important to understand that requests can **NOT** include any combination of 'athleteId', 'testTypeId', 'teamId', or 'groupId'. This will result in and error. Any of these arguments **CAN** be used with 'from', 'to', 'active', and 'sync'.
-* `GetTestsAth()` - Get only tests of the specified athlete from your organization. You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from the athlete, within the time range (if specified).
-* `GetTestsType()` - Get only tests of the specified test type from your organization. You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from that test type, within the time range (if specified).
-* `GetTestsTeam()` - Get only tests of the specified teams from your organization. Requires a `teamId` argument, which expects a text string, list or tuple (max of 10 teams). You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from those teams, within the time range (if specified).
-* `GetTestsGroup()` - Get only tests of the specified groups from your organization. Requires a `groupId` argument, which expects a text string, list or tuple (max of 10 groups). You can specify a time frame `from_`, or `to_`, which the tests should come (or be synced). Response will be a data frame containing the trials from those groups, within the time range (if specified).
-* `GetForceTime()` - Get the force-time data for a specific test by id. This includes both left, right and combined force data at 1000hz (per millisecond). Calculated velocity, displacement, and power at each time interval will also be included.
+*Note: the legacy `GetTestsAth`, `GetTestsType`, `GetTestsTeam`, and `GetTestsGroup` helpers were deprecated in hdforce v1.x and removed in v2.0.0. Use `GetTests()` with the corresponding `athleteId`, `typeId`, `teamId`, or `groupId` argument instead.*

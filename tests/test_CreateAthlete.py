@@ -6,6 +6,8 @@ from hdforce.CreateAthletes import CreateAthletes
 from hdforce.Classes import NewAthlete, AthleteResult
 
 # Mocked response generator for successful athlete creation
+
+
 def mock_success_response(formatted_time):
     return {
         'data': [{'name': f'Name_{formatted_time}', 'id': 'athlete_id_1'}],
@@ -13,13 +15,20 @@ def mock_success_response(formatted_time):
     }
 
 # Mocked response generator for failed athlete creation
+
+
 def mock_failure_response(formatted_time):
     return {
         'data': [],
-        'failures': [{'reason': 'Duplicate or Invalid Athlete Name', 'data': {'name': f'Name_{formatted_time}'}}]
+        'failures': [{
+            'reason': 'Duplicate or Invalid Athlete Name',
+            'data': {'name': f'Name_{formatted_time}'}
+        }]
     }
 
 # Successful call with file
+
+
 @patch('hdforce.CreateAthletes.requests.post')
 def test_CreateAthletes_file(mock_post):
     # Get the current time
@@ -29,10 +38,11 @@ def test_CreateAthletes_file(mock_post):
     formatted_time = current_time.strftime("%Y%m%d%H%M%S")
 
     # Mock the POST request response
-    mock_post.return_value = MagicMock(status_code=200, json=lambda: mock_success_response(formatted_time))
+    mock_post.return_value = MagicMock(
+        status_code=200, json=lambda: mock_success_response(formatted_time))
 
     # Authenticate
-    AuthManager(authMethod="file", env_file_name=r"tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env", region="Development")
 
     # Create New Athletes
     players = [
@@ -55,6 +65,8 @@ def test_CreateAthletes_file(mock_post):
     assert len(response['failures']) == 0
 
 # Successful call with env
+
+
 @patch('hdforce.CreateAthletes.requests.post')
 def test_CreateAthletes_env(mock_post):
     # Get the current time
@@ -64,10 +76,11 @@ def test_CreateAthletes_env(mock_post):
     formatted_time = current_time.strftime("%Y%m%d%H%M%S")
 
     # Mock the POST request response
-    mock_post.return_value = MagicMock(status_code=200, json=lambda: mock_success_response(formatted_time))
+    mock_post.return_value = MagicMock(
+        status_code=200, json=lambda: mock_success_response(formatted_time))
 
     # Authenticate
-    AuthManager()
+    AuthManager(region="Development")
 
     # Create New Athletes
     players = [
@@ -90,6 +103,8 @@ def test_CreateAthletes_env(mock_post):
     assert len(response['failures']) == 0
 
 # Test for failure response
+
+
 @patch('hdforce.CreateAthletes.requests.post')
 def test_CreateAthletes_failure(mock_post):
     # Get the current time
@@ -99,10 +114,11 @@ def test_CreateAthletes_failure(mock_post):
     formatted_time = current_time.strftime("%Y%m%d%H%M%S")
 
     # Mock the POST request response
-    mock_post.return_value = MagicMock(status_code=200, json=lambda: mock_failure_response(formatted_time))
+    mock_post.return_value = MagicMock(
+        status_code=200, json=lambda: mock_failure_response(formatted_time))
 
     # Authenticate
-    AuthManager(authMethod="file", env_file_name=r"tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env", region="Development")
 
     # Create New Athletes
     players = [

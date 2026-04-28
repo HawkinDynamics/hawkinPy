@@ -1,16 +1,18 @@
 import pytest
 from hdforce.AuthManager import AuthManager
 from hdforce.GetGroups import GetGroups
-import pandas as pd 
+import pandas as pd
 
 # successful call with file
+
+
 def test_GetGroups_file():
-    
+
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env", region="Development")
     # Call for groups
     groups = GetGroups()
-    
+
     # Check response is DataFrame
     assert isinstance(groups, pd.DataFrame)
     assert isinstance(groups.attrs['Count'], int)
@@ -18,9 +20,9 @@ def test_GetGroups_file():
 
 # successful call with env
 def test_GetGroups_env():
-    
+
     # Authenticate
-    AuthManager()
+    AuthManager(region="Development")
     # Call for groups
     groups = GetGroups()
 

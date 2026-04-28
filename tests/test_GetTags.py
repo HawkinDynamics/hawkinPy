@@ -1,16 +1,18 @@
 import pytest
 from hdforce.AuthManager import AuthManager
 from hdforce.GetTags import GetTags
-import pandas as pd 
+import pandas as pd
 
 # successful call with file
+
+
 def test_GetTags_file():
-    
+
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env", region="Development")
     # Call for metrics
     data = GetTags()
-    
+
     # Check response is DataFrame
     assert isinstance(data, pd.DataFrame)
     assert isinstance(data.attrs['Count'], int)
@@ -18,9 +20,9 @@ def test_GetTags_file():
 
 # successful call with env
 def test_GetTags_env():
-    
+
     # Authenticate
-    AuthManager()
+    AuthManager(region="Development")
     # Call for metrics
     data = GetTags()
 

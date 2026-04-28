@@ -1,123 +1,101 @@
 # Create function to call tests by type
 import requests
 import os
-import datetime
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, ConfigManager, dtConverter
-from .AuthManager import AuthManager
+from .utils import responseHandler, logger, dtConverter, ensure_token
 
 # -------------------- #
 # Get All Tests
 
 
-def GetTests(from_=None, to_=None, sync=False, athleteId=None, typeId=None, teamId=None, groupId=None, includeInactive = False) -> pd.DataFrame:
-    """Get all test trials from an account. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
+def GetTests(
+    from_=None,
+    to_=None,
+    sync=False,
+    athleteId=None,
+    typeId=None,
+    teamId=None,
+    groupId=None,
+    includeInactive=False
+) -> pd.DataFrame:
+    """Get test trials using cursor-based pagination (API v1.13+).
+
+    Fetches all matching test trials from the account. Uses server-side
+    pagination (1,000 tests per page) and loops automatically until all
+    pages are retrieved.
 
     Parameters
     ----------
     from_ : int | str, optional
-        Unix timestamp (int) or string date (e.g., "YYYY-MM-DD") specifying the start time from which tests should be fetched. Default is None, which fetches tests from the beginning.
+        Unix timestamp (int) or date string ("YYYY-MM-DD") for the
+        start of the time range.
 
     to_ : int | str, optional
-        Unix timestamp (int) or string date (e.g., "YYYY-MM-DD") specifying the end time until which tests should be fetched. Default is None, which fetches tests up to the current time.
+        Unix timestamp (int) or date string ("YYYY-MM-DD") for the
+        end of the time range.
 
     sync : bool, optional
-        If True, the function fetches updated and newly created tests to synchronize with the database. Default is False.
+        If True, uses syncFrom/syncTo for incremental sync.
+        Default is False.
 
-    athleteId : str optional
-        The unique identifier of the athlete whose tests are to be retrieved.
+    athleteId : str, optional
+        Filter by a single athlete ID.
 
-    typeId : str optional
-        The canonical test ID, test type name, or test name abbreviation. Must correspond to known test types.
+    typeId : str, optional
+        Canonical test ID, test type name, or abbreviation.
 
-    teamId : str optional
-        A single team ID, tuple or list of team IDs to receive tests from specific teams.
+    teamId : str | list, optional
+        Single team ID or list of team IDs (max 10).
 
-    groupId : str optional
-        A single group ID or a comma-separated string of group IDs to receive tests from specific groups.
+    groupId : str | list, optional
+        Single group ID or list of group IDs (max 10).
 
     includeInactive : bool, optional
-        Default to False, where only active tests are returned. If True, all tests including inactive ones are returned.
+        Default False. When False, sends includeInactive=false to the
+        API so only active tests are returned server-side. Set True to
+        include inactive (disabled) trials.
 
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing test trials matching the query criteria, with columns dependent on the test data and the following DataFrame attributes:
-        - Last Sync Time
-        - Last Test Time
-        - Count of Tests
+        A DataFrame of test trials with attributes:
+        - Last Sync: int (lastSyncTime from final page)
+        - Last Test Time: int
+        - Count: int (total tests across all pages)
 
     Raises
     ------
     Exception
-        If the HTTP response status is not 200, indicating an unsuccessful API request, or if there is a failure in parsing the JSON response.
+        If the API returns a non-200 status code.
     ValueError
-        If there is an error in handling the JSON response or data formatting.
+        If multiple filter parameters are provided simultaneously.
     """
-    # Retrieve Access Token and check expiration
-    a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
-    tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-
-    # get current time in timestamp
-    now = datetime.datetime.now()
-    nowtime = datetime.datetime.timestamp(now)
-
-    # Validate refresh token and expiration
-    if a_token is None:
-        logger.error("No Access Token found.")
-        raise Exception("No Access Token found.")
-    elif int(nowtime) >= tokenExp:
-        logger.debug(f"Token Expired: {datetime.datetime.fromtimestamp(tokenExp)}")
-        # authenticate
-        try:
-            AuthManager(
-                region=ConfigManager.region,
-                authMethod=ConfigManager.env_method,
-                refreshToken_name=ConfigManager.token_name,
-                refreshToken=ConfigManager.refresh_token,
-                env_file_name=ConfigManager.file_name
-            )
-            # Retrieve Access Token and check expiration
-            a_token = ConfigManager.get_env_variable("ACCESS_TOKEN")
-            logger.debug("New ACCESS_TOKEN retrieved")
-            tokenExp = int(ConfigManager.get_env_variable("TOKEN_EXPIRATION"))
-            logger.debug("TOKEN_EXPIRATION retrieved")
-            if a_token is None:
-                logger.error("No Access Token found.")
-                raise Exception("No Access Token found.")
-            elif int(nowtime) >= tokenExp:
-                logger.debug(f"Token Expired: {datetime.datetime.fromtimestamp(tokenExp)}")
-                raise Exception("Token expired")
-            else:
-                logger.debug(f"New Access Token valid through: {datetime.datetime.fromtimestamp(tokenExp)}")
-                pass
-        except ValueError:
-            logger.error("Failed to authenticate. Try AuthManager")
-            raise Exception("Failed to authenticate. Try AuthManage")
-    else:
-        logger.debug(f"Access Token retrieved. expires {datetime.datetime.fromtimestamp(tokenExp)}")
+    # Validate token
+    a_token = ensure_token()
 
     # Create URL for request
     url = os.getenv("CLOUD_URL")
 
-    # Create blank Query list to handle parameters
+    # Build query parameters
     query = {}
 
-    # Check if more than one of the specified parameters is provided
+    # Only one filter param allowed
     provided_params = [athleteId, typeId, teamId, groupId]
-    provided_count = sum(1 for param in provided_params if param is not None)
-    # Error if more than one key parameter provided
+    provided_count = sum(1 for p in provided_params if p is not None)
     if provided_count > 1:
-        raise ValueError("Only one of athleteId, typeId, teamId, or groupId can be provided at the same time.")
+        raise ValueError(
+            "Only one of athleteId, typeId, teamId, or groupId "
+            "can be provided at the same time."
+        )
 
-    # Convert from_ and to_ to epoch timestamps
+    # Convert dates to epoch
     if from_ is not None:
         from_ = dtConverter(from_)
     if to_ is not None:
         to_ = dtConverter(to_)
 
-    # Evaluate from and to dates for Sync command
+    # Time parameters
     if sync is True:
         if from_ is not None:
             query['syncFrom'] = from_
@@ -129,134 +107,180 @@ def GetTests(from_=None, to_=None, sync=False, athleteId=None, typeId=None, team
         if to_ is not None:
             query['to'] = to_
 
-    # Evaluate for Athlete argument
+    # Filter parameters
     if athleteId is not None:
         query['athleteId'] = athleteId
 
-    # Evaluate for Test Type argument
     if typeId is not None:
-        # Check typeId
         type_ids = {
-            "7nNduHeM5zETPjHxvm7s": ["7nNduHeM5zETPjHxvm7s", "Countermovement Jump", "CMJ"],
-            "QEG7m7DhYsD6BrcQ8pic": ["QEG7m7DhYsD6BrcQ8pic", "Squat Jump", "SJ"],
-            "2uS5XD5kXmWgIZ5HhQ3A": ["2uS5XD5kXmWgIZ5HhQ3A", "Isometric Test", "ISO"],
-            "gyBETpRXpdr63Ab2E0V8": ["gyBETpRXpdr63Ab2E0V8", "Drop Jump", "DJ"],
-            "5pRSUQVSJVnxijpPMck3": ["5pRSUQVSJVnxijpPMck3", "Free Run", "FREE"],
-            "pqgf2TPUOQOQs6r0HQWb": ["pqgf2TPUOQOQs6r0HQWb", "CMJ Rebound", "CMJR"],
-            "r4fhrkPdYlLxYQxEeM78": ["r4fhrkPdYlLxYQxEeM78", "Multi Rebound", "MR"],
-            "ubeWMPN1lJFbuQbAM97s": ["ubeWMPN1lJFbuQbAM97s", "Weigh In", "WI"],
-            "rKgI4y3ItTAzUekTUpvR": ["rKgI4y3ItTAzUekTUpvR", "Drop Landing", "DL"],
-            "4KlQgKmBxbOY6uKTLDFL": ["4KlQgKmBxbOY6uKTLDFL", "TS Free Run", "TSFR"],
-            "umnEZPgi6zaxuw0KhUpM": ["umnEZPgi6zaxuw0KhUpM", "TS Isometric Test", "TSISO"]
+            "7nNduHeM5zETPjHxvm7s": [
+                "7nNduHeM5zETPjHxvm7s",
+                "Countermovement Jump", "CMJ"
+            ],
+            "QEG7m7DhYsD6BrcQ8pic": [
+                "QEG7m7DhYsD6BrcQ8pic",
+                "Squat Jump", "SJ"
+            ],
+            "2uS5XD5kXmWgIZ5HhQ3A": [
+                "2uS5XD5kXmWgIZ5HhQ3A",
+                "Isometric Test", "ISO"
+            ],
+            "gyBETpRXpdr63Ab2E0V8": [
+                "gyBETpRXpdr63Ab2E0V8",
+                "Drop Jump", "DJ"
+            ],
+            "5pRSUQVSJVnxijpPMck3": [
+                "5pRSUQVSJVnxijpPMck3",
+                "Free Run", "FREE"
+            ],
+            "pqgf2TPUOQOQs6r0HQWb": [
+                "pqgf2TPUOQOQs6r0HQWb",
+                "CMJ Rebound", "CMJR"
+            ],
+            "r4fhrkPdYlLxYQxEeM78": [
+                "r4fhrkPdYlLxYQxEeM78",
+                "Multi Rebound", "MR"
+            ],
+            "ubeWMPN1lJFbuQbAM97s": [
+                "ubeWMPN1lJFbuQbAM97s",
+                "Weigh In", "WI"
+            ],
+            "rKgI4y3ItTAzUekTUpvR": [
+                "rKgI4y3ItTAzUekTUpvR",
+                "Drop Landing", "DL"
+            ],
+            "4KlQgKmBxbOY6uKTLDFL": [
+                "4KlQgKmBxbOY6uKTLDFL",
+                "TS Free Run", "TSFR"
+            ],
+            "umnEZPgi6zaxuw0KhUpM": [
+                "umnEZPgi6zaxuw0KhUpM",
+                "TS Isometric Test", "TSISO"
+            ]
         }
-        # Sort test type Id
+        t_id = None
         for key, values in type_ids.items():
             if typeId in values:
                 t_id = key
                 break
-        else:
+        if t_id is None:
             logger.error("typeId incorrect. Check your entry")
-            raise Exception("typeId incorrect. Check your entry")
-
-        # Add Test Type Id to params query
+            raise ValueError("typeId incorrect. Check your entry")
         query['testTypeId'] = t_id
 
-    # Evaluate for Team Id argument
     if teamId is not None:
-        # Handling teamId input whether single ID or tuple of IDs
         if isinstance(teamId, (tuple, list)):
-            query['teamId']  = ','.join(map(str, teamId))  # Join multiple team IDs into a comma-separated string
+            query['teamId'] = ','.join(map(str, teamId))
         elif isinstance(teamId, str):
-            query['teamId'] = teamId  # Use the single team ID as is
+            query['teamId'] = teamId
         else:
-            logger.error("teamId must be a string or a tuple/list of strings.")
-            raise ValueError("teamId must be a string or a tuple/list of strings.")
+            raise ValueError(
+                "teamId must be a string or a list of strings."
+            )
 
-
-    # Evaluate for Group Id argument
     if groupId is not None:
-        # Handling groupId input whether single ID or tuple of IDs
         if isinstance(groupId, (tuple, list)):
-            query['groupId']  = ','.join(map(str, groupId))  # Join multiple team IDs into a comma-separated string
+            query['groupId'] = ','.join(map(str, groupId))
         elif isinstance(groupId, str):
-            query['groupId'] = groupId  # Use the single team ID as is
+            query['groupId'] = groupId
         else:
-            logger.error("groupId must be a string or a tuple/list of strings.")
-            raise ValueError("groupId must be a string or a tuple/list of strings.")
+            raise ValueError(
+                "groupId must be a string or a list of strings."
+            )
 
-    # Log request
-    if from_ is not None and to_ is not None:
-        logger.debug(f"Test Request from_dt to_dt")
-    elif from_ is None:
-        logger.debug(f"Test Request to_dt")
-    elif to_ is None:
-        logger.debug(f"Test Request from_dt")
-    # GET Request
+    # Server-side includeInactive (API v1.13+)
+    if not includeInactive:
+        query['includeInactive'] = 'false'
+
+    # Enable pagination
+    query['paginate'] = 'true'
+
+    # Pagination loop
     headers = {"Authorization": f"Bearer {a_token}"}
-    # Request Logging
-    logger.debug(f"Request headers: {headers}")
+    all_pages = []
+    last_sync_time = None
+    last_test_time = None
+    total_count = 0
+    cursor = None
+
     logger.debug(f"Request URL: {url}")
     logger.debug(f"Query parameters: {query}")
 
-    response = requests.get(url, headers=headers, params=query)
-    logger.debug(f"GetTests response code: {response.status_code}")
+    while True:
+        # Refresh token if needed between pages
+        a_token = ensure_token()
+        headers = {"Authorization": f"Bearer {a_token}"}
 
-    # Check response status and handle data accordingly
-    if response.status_code != 200:
-        logger.error(f"{response.status_code}: {response.reason}")
-        raise Exception(f"Error {response.status_code}: {response.reason}")
+        # Add cursor for subsequent pages
+        current_query = dict(query)
+        if cursor is not None:
+            current_query['cursor'] = cursor
 
-    try:
+        response = requests.get(
+            url, headers=headers, params=current_query
+        )
+        logger.debug(f"GetTests response code: {response.status_code}")
+
+        if response.status_code != 200:
+            logger.error(
+                f"{response.status_code}: {response.reason}"
+            )
+            raise Exception(
+                f"Error {response.status_code}: {response.reason}"
+            )
+
         data = response.json()
-        # Check if the data dictionary is empty
-        if data.get('count', 0) == 0:
-            logger.info("No tests returned from query")
-            return "No tests returned from query"
 
-        # run data handler function
-        df = responseHandler(data) 
+        if data.get('count', 0) > 0:
+            df_page = responseHandler(data)
+            all_pages.append(df_page)
 
-        # Filter active tests if required
-        if 'active' in df.columns and includeInactive == False:
-            df = df[df['active'] == True]
+        # Capture envelope metadata from each page
+        last_sync_time = int(data.get('lastSyncTime', 0))
+        last_test_time = int(data.get('lastTestTime', 0))
+        total_count += data.get('count', 0)
 
-        # Setting attributes
-        # Create Test Type info for df attrs
-        if typeId:
-            if t_id in type_ids:
-                type_info = type_ids[t_id]
+        # Check for more pages
+        cursor = data.get('nextCursor')
+        if cursor is None:
+            break
 
-        # Create team info for df attrs
-        if teamId:
-            df.attrs['Team Id'] = teamId
+        logger.debug("Page complete. Fetching next page...")
 
-        # Create group info for df attrs
-        if groupId:
-            df.attrs['Group Id'] = groupId
+    # Combine all pages
+    if len(all_pages) == 0:
+        logger.info("No tests returned from query")
+        return pd.DataFrame()
 
-        # Athlete Real Name
-        if athleteId:
-            aName = df['athlete_name'].unique()
-            aName = str(aName[0])
+    df = pd.concat(all_pages, ignore_index=True)
+
+    # Deduplicate
+    df = df.drop_duplicates(subset=['id'], keep='first')
+
+    # Set DataFrame attributes
+    if typeId and t_id in type_ids:
+        df.attrs['Type Id'] = t_id
+
+    if teamId:
+        df.attrs['Team Id'] = teamId
+    if groupId:
+        df.attrs['Group Id'] = groupId
+
+    if athleteId:
+        aName = df['athlete_name'].unique()
+        if len(aName) > 0:
             df.attrs['Athlete Id'] = athleteId
-            df.attrs['Athlete Name'] = aName
-        
-        last_sync_time = int(data['lastSyncTime'])
-        df.attrs['Last Sync'] = last_sync_time  # Save as attribute
-        df.attrs['Last Test Time'] = int(data['lastTestTime'])
-        df.attrs['Count'] = int(data['count'])
+            df.attrs['Athlete Name'] = str(aName[0])
 
-        # Add Last Sync column
-        df['last_sync_time'] = last_sync_time
-        
-        logger.info(f"Request successful. Tests returned: {data['count']}")
-        return df
+    df.attrs['Last Sync'] = last_sync_time
+    df.attrs['Last Test Time'] = last_test_time
+    df.attrs['Count'] = total_count
 
-    except requests.RequestException as e:
-        return f"Request Error: {e}"
+    # Add last_sync_time column
+    df['last_sync_time'] = last_sync_time
 
-    except ValueError as e:
-        return f"JSON Error: {e}"
-
-    except Exception as e:
-        return f"An error occurred: {e}"
+    logger.info(
+        f"Request successful. {total_count} tests returned "
+        f"across {len(all_pages)} pages."
+    )
+    return df

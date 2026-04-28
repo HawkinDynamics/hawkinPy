@@ -1,16 +1,18 @@
 import pytest
 from hdforce.AuthManager import AuthManager
 from hdforce.GetForceTime import GetForceTime
-import pandas as pd 
+import pandas as pd
 
 # successful call
+
+
 def test_GetForceTime_file():
-    
+
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env", region="Development")
 
     # Call for ForceTime
-    data = GetForceTime(testId = "9Ytz9g1erMXm3SByTyEd")
+    data = GetForceTime(testId="9Ytz9g1erMXm3SByTyEd")
     # Check response is DataFrame
     assert isinstance(data, pd.DataFrame)
     # Check attribute is int
@@ -19,11 +21,11 @@ def test_GetForceTime_file():
 
 # successful call
 def test_GetForceTime_env():
-    
+
     # Authenticate
-    AuthManager()
+    AuthManager(region="Development")
     # Call for ForceTime
-    data = GetForceTime(testId = "9Ytz9g1erMXm3SByTyEd")
+    data = GetForceTime(testId="9Ytz9g1erMXm3SByTyEd")
 
     # Check response is DataFrame
     assert isinstance(data, pd.DataFrame)

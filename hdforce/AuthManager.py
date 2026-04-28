@@ -11,7 +11,14 @@ logger = LoggerConfig.get_logger(__name__)
 # Authenticator
 
 
-def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TOKEN", refreshToken: str = None, env_file_name: str = None, region: str = "Americas", orgName: str = None) -> None:
+def AuthManager(
+    authMethod: str = "env",
+    refreshToken_name: str = "HD_REFRESH_TOKEN",
+    refreshToken: str = None,
+    env_file_name: str = None,
+    region: str = "Americas",
+    orgName: str = None
+) -> None:
     """ Choose the authentication settings
 
 
@@ -21,13 +28,19 @@ def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TO
         The region that designates the url prefix.
 
     authMethod : str required
-        Determine method of storing authentication variables, including refresh token. One of 'env', 'file', 'manual'. env = use of system environment. file = use of .env file. manual = no stored refresh token.
+        Determine method of storing authentication variables,
+        including refresh token. One of 'env', 'file', 'manual'.
+        env = use of system environment. file = use of .env file.
+        manual = no stored refresh token.
 
     refreshToken_name : str
-        Specific name of refresh token variable saved in system environment or .env file
+        Specific name of refresh token variable saved in system
+        environment or .env file
 
     refreshToken : str
-        If used with authMethod='manual', token will be used to authenticate without being stored. Else token will be used set as the new refresh token value with method selected.
+        If used with authMethod='manual', token will be used to
+        authenticate without being stored. Else token will be used
+        set as the new refresh token value with method selected.
 
     env_file_name : str
         Required with authMethod='file'. Provides file name for variable storage.
@@ -70,9 +83,10 @@ def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TO
         else:
             key = refreshToken
             kabrv = key[0:6]
-            #logger.debug(f"Manual auth method used with token {kabrv}xxxx")
+            # logger.debug(f"Manual auth method used with token {kabrv}xxxx")
     else:
-        key = varsManager(name=refreshToken_name, value=refreshToken, method=authMethod, file=env_file_name)
+        key = varsManager(name=refreshToken_name, value=refreshToken,
+                          method=authMethod, file=env_file_name)
         kabrv = key[0:6]
         logger.debug(f"Refresh token: {kabrv}xxxx method: {authMethod}")
 
@@ -92,45 +106,45 @@ def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TO
         set_key(fileName, "ACCESS_TOKEN", accessToken)
         # Environment variable debugging: Access Token
         if accessToken == os.getenv("ACCESS_TOKEN"):
-            logger.debug(f"New Access Token Set")
+            logger.debug("New Access Token Set")
         else:
-            logger.debug(f"Error: new token not found")
+            logger.debug("Error: new token not found")
 
         # Environment variable debugging: Token Expiration
         set_key(fileName, "TOKEN_EXPIRATION", tokenExpiration)
         if tokenExpiration == os.getenv("TOKEN_EXPIRATION"):
-            logger.debug(f"New expiration Set")
+            logger.debug("New expiration Set")
         else:
-            logger.debug(f"Error: new expiration not passed")
+            logger.debug("Error: new expiration not passed")
 
         # Environment variable debugging: Cloud URL
         set_key(fileName, "CLOUD_URL", cloudURL)
         if cloudURL == os.getenv("CLOUD_URL"):
-            logger.debug(f"New URL set")
+            logger.debug("New URL set")
         else:
-            logger.debug(f"Error: new URL not passed")
+            logger.debug("Error: new URL not passed")
 
     else:
         # Environment variable debugging: Access Token
         os.environ['ACCESS_TOKEN'] = accessToken
         if accessToken == os.getenv("ACCESS_TOKEN"):
-            logger.debug(f"New Access Token Set")
+            logger.debug("New Access Token Set")
         else:
-            logger.debug(f"Error: new token not found")
+            logger.debug("Error: new token not found")
 
         # Environment variable debugging: Token Expiration
         os.environ['TOKEN_EXPIRATION'] = tokenExpiration
         if tokenExpiration == os.getenv("TOKEN_EXPIRATION"):
-            logger.debug(f"New expiration Set")
+            logger.debug("New expiration Set")
         else:
-            logger.debug(f"Error: new expiration not passed")
+            logger.debug("Error: new expiration not passed")
 
         # Environment variable debugging: Cloud URL
         os.environ['CLOUD_URL'] = cloudURL
         if cloudURL == os.getenv("CLOUD_URL"):
-            logger.debug(f"New URL set")
+            logger.debug("New URL set")
         else:
-            logger.debug(f"Error: new URL not passed")
+            logger.debug("Error: new URL not passed")
 
     # Set environment source in ConfigManager based on authMethod
     if authMethod == 'file':
@@ -141,13 +155,15 @@ def AuthManager(authMethod: str = "env", refreshToken_name: str = "HD_REFRESH_TO
         # if filename exists and string initialize dotenv
         load_dotenv(str(fileName), override=True)
         # run configuration manager
-        ConfigManager.set_env_source(region=region, method=authMethod, fileName=fileName, token_name=refreshToken_name, token=key)
+        ConfigManager.set_env_source(region=region, method=authMethod,
+                                     fileName=fileName, token_name=refreshToken_name, token=key)
         logger.debug(f"ConfigManager methods passed with file env: {fileName}")
 
     # Using environment variables
     elif authMethod == 'env' or 'manual':
         # run configuration manager
-        ConfigManager.set_env_source(region=region, method=authMethod, fileName=fileName, token_name=refreshToken_name, token=key)
+        ConfigManager.set_env_source(region=region, method=authMethod,
+                                     fileName=fileName, token_name=refreshToken_name, token=key)
         logger.debug(f"ConfigManager methods passed with {authMethod} method")
 
     # Alert of missing variables

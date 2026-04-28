@@ -1,25 +1,27 @@
 import pytest
 from hdforce.AuthManager import AuthManager
 from hdforce.GetMetrics import GetMetrics
-import pandas as pd 
+import pandas as pd
 
 # successful call with file
+
+
 def test_GetMetrics_file():
-    
+
     # Authenticate
-    AuthManager(authMethod= "file", env_file_name= r"tests/.env")
+    AuthManager(authMethod="file", env_file_name=r"tests/.env", region="Development")
     # Call for metrics
     metrics = GetMetrics()
-    
+
     # Check response is DataFrame
     assert isinstance(metrics, pd.DataFrame)
 
 
 # successful call with env
 def test_GetMetrics_env():
-    
+
     # Authenticate
-    AuthManager()
+    AuthManager(region="Development")
     # Call for metrics
     metrics = GetMetrics()
 
