@@ -40,13 +40,13 @@ pandas = "^2.2.0"
 python-dotenv = "^1.0.1"
 requests = "^2.33.0"
 pydantic = "^2.0.0" 
-pyarrow = "^18.1.0"
-pyjanitor = "^0.30.0"
+pyarrow = ">=18.1,<25.0"
+pyjanitor = "^0.30"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.2.0" # Moved to dev
+pytest = ">=8.2,<10.0" # Moved to dev
 flake8 = "^7.0.0" # Moved to dev
-ipykernel = "^6.29.4"
+ipykernel = ">=6.29.4,<8.0.0"
 
 [tool.poetry-dynamic-versioning]
 enable = true

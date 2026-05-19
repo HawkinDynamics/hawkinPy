@@ -52,17 +52,17 @@ def test_CreateAthletes_file(mock_post):
     # Create Athlete
     response = CreateAthletes(athletes=players)
 
-    # Check response is a dictionary
-    assert isinstance(response, dict)
-    assert 'successful' in response
-    assert 'failures' in response
+    # Response is a list of AthleteResult objects (one per input athlete)
+    assert isinstance(response, list)
+    assert len(response) == 1
+    assert all(isinstance(r, AthleteResult) for r in response)
 
-    # Check successful athletes
-    assert len(response['successful']) == 1
-    assert response['successful'][0] == f"Name_{formatted_time}"
-
-    # Check failures
-    assert len(response['failures']) == 0
+    # Single successful result
+    result = response[0]
+    assert result.successful is True
+    assert result.name == f"Name_{formatted_time}"
+    assert result.id == 'athlete_id_1'
+    assert result.reason == []
 
 # Successful call with env
 
@@ -90,17 +90,17 @@ def test_CreateAthletes_env(mock_post):
     # Create Athlete
     response = CreateAthletes(athletes=players)
 
-    # Check response is a dictionary
-    assert isinstance(response, dict)
-    assert 'successful' in response
-    assert 'failures' in response
+    # Response is a list of AthleteResult objects (one per input athlete)
+    assert isinstance(response, list)
+    assert len(response) == 1
+    assert all(isinstance(r, AthleteResult) for r in response)
 
-    # Check successful athletes
-    assert len(response['successful']) == 1
-    assert response['successful'][0] == f"Name_{formatted_time}"
-
-    # Check failures
-    assert len(response['failures']) == 0
+    # Single successful result
+    result = response[0]
+    assert result.successful is True
+    assert result.name == f"Name_{formatted_time}"
+    assert result.id == 'athlete_id_1'
+    assert result.reason == []
 
 # Test for failure response
 
@@ -128,15 +128,14 @@ def test_CreateAthletes_failure(mock_post):
     # Create Athlete
     response = CreateAthletes(athletes=players)
 
-    # Check response is a dictionary
-    assert isinstance(response, dict)
-    assert 'successful' in response
-    assert 'failures' in response
+    # Response is a list of AthleteResult objects (one per input athlete)
+    assert isinstance(response, list)
+    assert len(response) == 1
+    assert all(isinstance(r, AthleteResult) for r in response)
 
-    # Check successful athletes
-    assert len(response['successful']) == 0
-
-    # Check failures
-    assert len(response['failures']) == 1
-    assert 'Duplicate or Invalid Athlete Name' in response['failures']
-    assert response['failures']['Duplicate or Invalid Athlete Name'][0] == f"Name_{formatted_time}"
+    # Single failed result
+    result = response[0]
+    assert result.successful is False
+    assert result.name == f"Name_{formatted_time}"
+    assert result.id == ''
+    assert 'Duplicate or Invalid Athlete Name' in result.reason

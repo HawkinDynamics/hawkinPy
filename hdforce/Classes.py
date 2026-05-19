@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 from pydantic import BaseModel
 
 # Athlete Class
@@ -26,6 +26,17 @@ class Athlete(BaseModel):
     teams: List[str] = []
     groups: List[str] = []
     external: Dict = {}
+    # image is three-state per the API: omitted = never set,
+    # None = explicitly cleared, str = URL. Pydantic collapses
+    # absent and None to None here.
+    image: Optional[str] = None
+    position: Optional[str] = None
+    dob: Optional[str] = None
+    sport: Optional[str] = None
+    # Centimeters, range [1, 300] when present.
+    height: Optional[float] = None
+    # Unix epoch milliseconds of the athlete's most recent test session.
+    lastTestedOn: Optional[int] = None
 
 # -------------------- #
 # Team Class

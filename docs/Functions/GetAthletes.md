@@ -1,4 +1,4 @@
-__`GetAthletes(inactive: bool = False)`__
+__`GetAthletes(includeInactive: bool = False)`__
 
 ### Description
 Get the athletes for an account.
@@ -14,6 +14,12 @@ A Pandas DataFrame containing the athletes' information, with columns:
 * __teams__: A nested list of athlete's team ids as strings.
 * __groups__: A nested list of athlete's group ids as strings.
 * __active__: Boolean indicating if the athlete's profile is active (not archived).
+* __image__ _(optional)_: URL to the athlete's photo. `None` when the photo has been explicitly cleared; column absent when no photo was ever uploaded.
+* __position__ _(optional)_: Free-text playing position (e.g. "Forward", "Catcher").
+* __dob__ _(optional)_: Date of birth as an ISO-8601 date string (`YYYY-MM-DD`).
+* __sport__ _(optional)_: Free-text sport name.
+* __height__ _(optional)_: Athlete height in **centimeters**, range `[1, 300]`.
+* __lastTestedOn__ _(optional)_: Unix epoch milliseconds of the athlete's most recent test session.
 * __external__: Columns dynamically created for each external attribute associated with the athletes. (example = external.ExternalId: value)
 
 ### Raises

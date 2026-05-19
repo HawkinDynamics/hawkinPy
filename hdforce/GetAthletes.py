@@ -20,8 +20,13 @@ def GetAthletes(includeInactive: bool = False) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        A DataFrame with columns: id, name, teams, groups, active,
-        and any external.* attribute columns.
+        A DataFrame with columns: id, name, teams, groups, active, and
+        any external.* attribute columns. When populated on the source
+        record, the following optional profile columns also appear:
+        image (URL string, or None if cleared), position, dob (ISO-8601
+        date string), sport, height (centimeters, range [1, 300]),
+        lastTestedOn (Unix epoch milliseconds of the most recent test
+        session).
 
     Raises
     ------
@@ -30,10 +35,11 @@ def GetAthletes(includeInactive: bool = False) -> pd.DataFrame:
     """
     a_token = ensure_token()
     url_cloud = os.getenv("CLOUD_URL")
-    url = f"{url_cloud}/athletes?inactive={includeInactive}"
+    flag = "true" if includeInactive else "false"
+    url = f"{url_cloud}/athletes?includeInactive={flag}"
 
     logger.debug(
-        f"GET Request: Athletes (inactive = {includeInactive})"
+        f"GET Request: Athletes (includeInactive = {includeInactive})"
     )
     headers = {"Authorization": f"Bearer {a_token}"}
     response = requests.get(url, headers=headers)

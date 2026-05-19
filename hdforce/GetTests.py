@@ -17,7 +17,8 @@ def GetTests(
     typeId=None,
     teamId=None,
     groupId=None,
-    includeInactive=False
+    includeInactive=False,
+    includeEid=False
 ) -> pd.DataFrame:
     """Get test trials using cursor-based pagination (API v1.13+).
 
@@ -55,6 +56,11 @@ def GetTests(
         Default False. When False, sends includeInactive=false to the
         API so only active tests are returned server-side. Set True to
         include inactive (disabled) trials.
+
+    includeEid : bool, optional
+        Default False. When True, the API includes an `eid` (equipment ID)
+        column on each test record identifying the hardware that produced
+        the trial.
 
     Returns
     -------
@@ -192,6 +198,10 @@ def GetTests(
     if not includeInactive:
         query['includeInactive'] = 'false'
 
+    # Optional: include equipment ID on each record
+    if includeEid:
+        query['includeEid'] = 'true'
+
     # Enable pagination
     query['paginate'] = 'true'
 
@@ -235,10 +245,12 @@ def GetTests(
             df_page = responseHandler(data)
             all_pages.append(df_page)
 
-        # Capture envelope metadata from each page
-        last_sync_time = int(data.get('lastSyncTime', 0))
-        last_test_time = int(data.get('lastTestTime', 0))
-        total_count += data.get('count', 0)
+        # Capture envelope metadata from each page. The API may return
+        # `lastSyncTime: null` / `lastTestTime: null` on empty pages, so
+        # `or 0` covers both missing key and explicit null.
+        last_sync_time = int(data.get('lastSyncTime') or 0)
+        last_test_time = int(data.get('lastTestTime') or 0)
+        total_count += data.get('count', 0) or 0
 
         # Check for more pages
         cursor = data.get('nextCursor')
