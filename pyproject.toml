@@ -57,4 +57,4 @@ pattern-prefix = "py-v" # Matches your monorepo tag strategy
 [build-system]
 # Added dynamic-versioning to requirements for better install compatibility
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0"]
-build-backend = "poetry.dynamic_versioning.backend"
+build-backend = "poetry_dynamic_versioning.backend"
