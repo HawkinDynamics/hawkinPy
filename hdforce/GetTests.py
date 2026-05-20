@@ -262,7 +262,14 @@ def GetTests(
     # Combine all pages
     if len(all_pages) == 0:
         logger.info("No tests returned from query")
-        return pd.DataFrame()
+        empty_df = pd.DataFrame()
+        # Set envelope attrs even on empty result so callers can rely on
+        # them existing (last_sync_time / last_test_time may be 0 if the
+        # API returned null for both, which is fine).
+        empty_df.attrs['Last Sync'] = last_sync_time
+        empty_df.attrs['Last Test Time'] = last_test_time
+        empty_df.attrs['Count'] = total_count
+        return empty_df
 
     df = pd.concat(all_pages, ignore_index=True)
 

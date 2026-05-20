@@ -28,8 +28,9 @@ def mock_forcetime_response(test_id="test_abc123"):
     }
 
 
+@patch('hdforce.GetForceTime.ensure_token', return_value='fake_access_token')
 @patch('hdforce.GetForceTime.requests.get')
-def test_GetForceTime_file(mock_get):
+def test_GetForceTime_file(mock_get, mock_token):
     # Mock the GET request response
     mock_get.return_value = MagicMock(
         status_code=200, json=lambda: mock_forcetime_response("test_abc123")
@@ -56,8 +57,9 @@ def test_GetForceTime_file(mock_get):
             "velocity", "displacement", "power"} <= set(data.columns)
 
 
+@patch('hdforce.GetForceTime.ensure_token', return_value='fake_access_token')
 @patch('hdforce.GetForceTime.requests.get')
-def test_GetForceTime_env(mock_get):
+def test_GetForceTime_env(mock_get, mock_token):
     # Mock the GET request response
     mock_get.return_value = MagicMock(
         status_code=200, json=lambda: mock_forcetime_response("test_abc123")
@@ -74,8 +76,9 @@ def test_GetForceTime_env(mock_get):
     assert data.attrs['Test ID'] == "test_abc123"
 
 
+@patch('hdforce.GetForceTime.ensure_token', return_value='fake_access_token')
 @patch('hdforce.GetForceTime.requests.get')
-def test_GetForceTime_unknown_id_raises(mock_get):
+def test_GetForceTime_unknown_id_raises(mock_get, mock_token):
     """The API returns 200 with an empty body for unknown test IDs;
     GetForceTime should raise ValueError in that case."""
     mock_get.return_value = MagicMock(status_code=200, json=lambda: {})
