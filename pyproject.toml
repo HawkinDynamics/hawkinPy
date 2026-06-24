@@ -41,7 +41,7 @@ python-dotenv = "^1.0.1"
 requests = "^2.33.0"
 pydantic = "^2.0.0" 
 pyarrow = ">=18.1,<25.0"
-pyjanitor = "^0.30"
+pyjanitor = ">=0.30,<0.33"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.2,<10.0" # Moved to dev
