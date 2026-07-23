@@ -19,6 +19,8 @@ nav:
     - GetTags: Functions/GetTags.md
     - GetTests: Functions/GetTests.md
     - GetForceTime: Functions/GetForceTime.md
+    - GetForceTimeBulk: Functions/GetForceTimeBulk.md
+    - GetCOP: Functions/GetCOP.md
     - SyncDB: Functions/SyncDB.md
     - UpdateAthletes: Functions/UpdateAthletes.md
   - About:

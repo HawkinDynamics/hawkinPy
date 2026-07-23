@@ -76,9 +76,9 @@ class ConfigManager:
     @classmethod
     def set_env_source(self, region, method, fileName, token_name, token):
         # Set the source of environment variables ('file' or 'system')
-        if method not in ['file', 'env', 'manual']:
-            logger.error("Source must be 'file', 'env', or 'manual'")
-            raise ValueError("Source must be 'file', 'env', or 'manual'.")
+        if method not in ['file', 'env', 'manual', 'keyring']:
+            logger.error("Source must be 'file', 'env', 'manual', or 'keyring'")
+            raise ValueError("Source must be 'file', 'env', 'manual', or 'keyring'.")
 
         self.env_method = method
         logger.debug(f"method: {method}")
@@ -141,6 +141,22 @@ def varsManager(name: str, method: str, file: str = None, value: str = None) -> 
             logger.debug(f"token: {value}")
         else:
             token = os.getenv(str(name))
+    elif method == 'keyring':
+        try:
+            import keyring
+        except ImportError as e:
+            logger.error("The 'keyring' package is required for authMethod='keyring'.")
+            raise ImportError(
+                "The 'keyring' package is required for authMethod='keyring'. "
+                "Install it with `pip install keyring`."
+            ) from e
+        if value is not None:
+            keyring.set_password("hdforce", str(name), str(value))
+            logger.debug(f"Key Set: keyring | service(hdforce) | name({str(name)})")
+            token = str(value)
+        else:
+            token = keyring.get_password("hdforce", str(name))
+            logger.debug(f"Token retrieved from keyring for name({str(name)})")
     else:
         if value is not None:
             os.environ[str(name)] = str(value)

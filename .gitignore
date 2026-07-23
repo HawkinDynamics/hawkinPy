@@ -60,6 +60,10 @@ cover/
 *.mo
 *.pot
 
+# Smoke-test artifacts (dev/functional smoke runs write these to the CWD)
+smoke_test_*_results.csv
+smoke_test_*.log
+
 # Django stuff:
 *.log
 local_settings.py

@@ -25,7 +25,7 @@ def GetAthletes(includeInactive: bool = False) -> pd.DataFrame:
         record, the following optional profile columns also appear:
         image (URL string, or None if cleared), position, dob (ISO-8601
         date string), sport, height (centimeters, range [1, 300]),
-        lastTestedOn (Unix epoch milliseconds of the most recent test
+        lastTestedOn (Unix epoch seconds of the most recent test
         session).
 
     Raises

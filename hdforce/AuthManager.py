@@ -29,9 +29,11 @@ def AuthManager(
 
     authMethod : str required
         Determine method of storing authentication variables,
-        including refresh token. One of 'env', 'file', 'manual'.
+        including refresh token. One of 'env', 'file', 'manual', 'keyring'.
         env = use of system environment. file = use of .env file.
-        manual = no stored refresh token.
+        manual = no stored refresh token. keyring = store/read the refresh
+        token in the OS keychain (macOS Keychain, Windows Credential Manager,
+        Linux Secret Service) via the keyring package.
 
     refreshToken_name : str
         Specific name of refresh token variable saved in system
@@ -57,7 +59,7 @@ def AuthManager(
 
     """
     # auth method options
-    methods = ['env', 'file', 'manual']
+    methods = ['env', 'file', 'manual', 'keyring']
 
     # Check for valid method choice
     if authMethod not in methods:
@@ -159,8 +161,8 @@ def AuthManager(
                                      fileName=fileName, token_name=refreshToken_name, token=key)
         logger.debug(f"ConfigManager methods passed with file env: {fileName}")
 
-    # Using environment variables
-    elif authMethod == 'env' or 'manual':
+    # Using environment variables, manual token, or OS keychain
+    elif authMethod in ('env', 'manual', 'keyring'):
         # run configuration manager
         ConfigManager.set_env_source(region=region, method=authMethod,
                                      fileName=fileName, token_name=refreshToken_name, token=key)

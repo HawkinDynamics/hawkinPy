@@ -9,7 +9,8 @@
 * `CreateAthletes()` now returns `List[AthleteResult]` (was returning dict). Aligns with `UpdateAthletes()`.
 
 ### New Features
-* `GetForceTimeBulk()` — Fetch force-time data for multiple tests. Accepts list of IDs or DataFrame. Supports csv/json/parquet export and de-identification.
+* `GetCOP()` — Fetch raw Center of Pressure (COP) time-series data for a test. Returns a DataFrame of the six COP series (`copX`, `copY`, `leftCopX`, `leftCopY`, `rightCopX`, `rightCopY`) keyed by `time`. Exclusive to the Free Run test type (other types return 404); COP values are `NaN` for samples with no weight on a plate.
+* `GetForceTimeBulk()` — Fetch force-time data for multiple tests. Accepts a list of IDs or a DataFrame (e.g. `GetTests()` output), or delegates to `GetTests()`. Exports to csv/tsv/json/parquet with configurable `file_naming`, a `metadata_manifest.<format>` file, and de-identification (mirrors hawkinR's `get_forcetime_bulk()`).
 * `CreateAthletes` and `UpdateAthletes` are now exported from the package (previously required direct import).
 
 ### Improvements

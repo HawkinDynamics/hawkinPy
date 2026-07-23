@@ -19,7 +19,7 @@ A Pandas DataFrame containing the athletes' information, with columns:
 * __dob__ _(optional)_: Date of birth as an ISO-8601 date string (`YYYY-MM-DD`).
 * __sport__ _(optional)_: Free-text sport name.
 * __height__ _(optional)_: Athlete height in **centimeters**, range `[1, 300]`.
-* __lastTestedOn__ _(optional)_: Unix epoch milliseconds of the athlete's most recent test session.
+* __lastTestedOn__ _(optional)_: Unix epoch seconds of the athlete's most recent test session.
 * __external__: Columns dynamically created for each external attribute associated with the athletes. (example = external.ExternalId: value)
 
 ### Raises
