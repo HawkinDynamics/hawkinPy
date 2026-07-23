@@ -53,7 +53,13 @@ ipykernel = ">=6.29.4,<8.0.0"
 enable = true
 vcs = "git"
 style = "pep440"
-pattern-prefix = "py-v" # Matches your monorepo tag strategy
+# dunamai's `pattern-prefix` does not match our monorepo `py-v*` tags (it
+# resolves to a 0.0.0 base), so match the prefix explicitly with a full
+# pattern. Without this, builds come out as 0.0.0.postN.dev0+<hash>.
+pattern = '^py-v(?P<base>\d+\.\d+\.\d+)'
+# Never emit the +<git-hash> local-version segment: both PyPI and TestPyPI
+# reject local versions with HTTP 400.
+metadata = false
 
 [build-system]
 # Added dynamic-versioning to requirements for better install compatibility
