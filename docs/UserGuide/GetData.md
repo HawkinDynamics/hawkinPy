@@ -34,5 +34,8 @@ parameter. This parameter is best suited for bulk exports of historical data
 * `GetTests()` - The primary function to retrieve tests. Accepts `from_`, `to_`, `sync`, `includeInactive`, `athleteId`, `typeId`, `teamId`, and `groupId`. Only one entity filter (`athleteId`, `typeId`, `teamId`, or `groupId`) can be used per call. Any of these filters can be combined with `from_` / `to_` / `sync` / `includeInactive`.
 * `GetForceTime()` - Get the force-time data for a specific test by id. This includes left, right and combined force data at 1000hz (per millisecond). Calculated velocity, displacement, and power at each time interval will also be included.
 * `GetForceTimeBulk()` - Batch retrieval of force-time data for multiple test IDs, with optional export to csv, json, or parquet.
+* `GetCOP()` - Get the center-of-pressure (COP) time series for a specific **Free Run** test by id (new in v2.0.0, API v1.15). Returns a time index derived from the platform sampling rate alongside combined and per-platform COP coordinates.
+
+*Note: as of API v1.15, non-calculable metric values are returned as `null` (not the string `"N/A"`), and each test includes an `active` boolean by default.*
 
 *Note: the legacy `GetTestsAth`, `GetTestsType`, `GetTestsTeam`, and `GetTestsGroup` helpers were deprecated in hdforce v1.x and removed in v2.0.0. Use `GetTests()` with the corresponding `athleteId`, `typeId`, `teamId`, or `groupId` argument instead.*

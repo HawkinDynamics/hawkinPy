@@ -155,3 +155,20 @@ someTest = myTests.iloc[0]
 # Get force time data
 ftData = GetForceTime(testId = someTest)
 ```
+
+**Get Center of Pressure Data (Free Run tests)**
+
+`GetCOP()` returns the center-of-pressure time series for a **Free Run** test (new in v2.0.0, API v1.15).
+
+``` Python title="COP Data For A Free Run Test"
+from hdforce import GetTests, GetCOP
+
+# Get your Free Run tests (typeId accepts the test type name)
+freeRunTests = GetTests(typeId = "Free Run")
+
+# Grab a test id
+someFreeRun = freeRunTests.id.iloc[0]
+
+# Get the center-of-pressure time series
+copData = GetCOP(testId = someFreeRun)
+```
