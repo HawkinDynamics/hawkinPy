@@ -93,6 +93,8 @@ you will receive every test from the beginning of time or the optionally supplie
 parameter. This parameter is best suited for bulk exports of historical data
 * `sync` = The result set will include updated and newly created tests, following the time constraints of `from_` and `to_`. This parameter is best suited to keep your database in sync with the Hawkin database. It cannot and should not be used to fetch your entire database. A recommended strategy would be to have a job that runs on a short interval e.g. every five minutes that sends the `lastSyncTime` that it received as the `from_` parameter with `sync=True`.
 * `includeInactive` = If False (default), only active tests are returned. Set to True to include inactive (disabled) trials in the result set.
+* `includeEid` = If True, each test record includes an `eid` column identifying the equipment that produced the trial.
+* `useNulls`, `rounding`, `nestMetrics` = Response-shape overrides (API v1.16) for customers migrating from a legacy named endpoint to `/api/v1`. `useNulls=False` keeps `"N/A"` strings instead of `NaN`; `rounding=True` returns rounded metrics; `nestMetrics=True` returns a long DataFrame with one row per test × metric (`metric_id`, `metric_label`, `metric_units`, `metric_value`). Leave the defaults for new integrations.
 
 #### Get Test Function
 * `GetTests()` - Get the tests for your account. You can filter by `athleteId`, `typeId`, `teamId` (single or comma-separated list, max 10), or `groupId` (single or comma-separated list, max 10). You can also specify a time frame via `from_` / `to_` (or `sync=True` for incremental sync). Response will be a DataFrame containing the matching trials.

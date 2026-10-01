@@ -1,4 +1,4 @@
-__`GetTests(from_: int = None, to_: int = None, sync: bool = False, athleteId: str = None, typeId: str = None, teamId: str = None,groupId: str = None, includeInactive: bool = False)`__
+__`GetTests(from_: int = None, to_: int = None, sync: bool = False, athleteId: str = None, typeId: str = None, teamId: str = None,groupId: str = None, includeInactive: bool = False, includeEid: bool = False, useNulls: bool = True, rounding: bool = False, nestMetrics: bool = False)`__
 
 ### Description
 Get all test trials from an account. Allows filtering of results based on time frames, synchronization needs, and the active status of tests.
@@ -20,6 +20,14 @@ __`groupId`__: _(str)_ A single group ID, tuple or list of group IDs to receive 
 
 __`includeInactive`__: _(bool)_ Default to False, where only active tests are returned. If True, all tests including inactive ones are returned.
 
+__`includeEid`__: _(bool)_ Default False. If True, each test record includes an `eid` column identifying the equipment that produced the trial.
+
+__`useNulls`__: _(bool)_ Default True: non-calculable metrics are `NaN`. Set False to receive the string `"N/A"` instead (API v1.16); affected metric columns become object dtype. Intended for customers migrating from a legacy named endpoint.
+
+__`rounding`__: _(bool)_ Default False: raw metric values. Set True to have the API round each metric to its standard display precision (API v1.16). No effect when `nestMetrics=True`. Intended for customers migrating from a legacy named endpoint.
+
+__`nestMetrics`__: _(bool)_ Default False: one row per test with a column per metric. Set True to receive a long DataFrame instead — one row per test × metric with `metric_id`, `metric_label`, `metric_units`, `metric_value` columns beside the trial, athlete and test-type columns (API v1.16). A test with no numeric metrics keeps a single row with `NaN` metric fields. Intended for customers migrating from a legacy named endpoint.
+
 ### Returns
 A Pandas DataFrame containing details of the test trial, with columns:
 
@@ -28,7 +36,7 @@ A Pandas DataFrame containing details of the test trial, with columns:
 * __athlete_data__: Columns of athlete data. Same as DataFrame returned from GetAthletes(.id, .name, .teams, .groups, .active, external.name)
 * __testType_data__: Columns of test type data(.id, .name, .canonicalId, .groups, .active, external.name)
 * __tags_data__: Columns of test tags data(.id, .name). Each is a list of any applicable values.
-* __all test metrics__: Calculated center of mass displacement from starting height at each time point.
+* __all test metrics__: One column per metric (default), or — when `nestMetrics=True` — the four `metric_id`, `metric_label`, `metric_units`, `metric_value` columns with one row per test × metric.
 
 DataFrame is also returned with specific attributes:
 

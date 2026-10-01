@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import os
 # Package imports
-from .utils import logger, ensure_token
+from .utils import logger, ensure_token, auth_headers
 
 # -------------------- #
 # Get Center of Pressure
@@ -50,7 +50,7 @@ def GetCOP(testId: str) -> pd.DataFrame:
     url = f"{url_cloud}/cop/{testId}"
 
     logger.debug(f"GET COP data for test: {testId}")
-    headers = {"Authorization": f"Bearer {a_token}"}
+    headers = auth_headers(a_token)
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:

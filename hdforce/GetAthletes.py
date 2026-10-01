@@ -3,7 +3,7 @@ import requests
 import os
 import pandas as pd
 # Package imports
-from .utils import logger, ensure_token
+from .utils import logger, ensure_token, auth_headers
 
 # -------------------- #
 # Get Athletes
@@ -41,7 +41,7 @@ def GetAthletes(includeInactive: bool = False) -> pd.DataFrame:
     logger.debug(
         f"GET Request: Athletes (includeInactive = {includeInactive})"
     )
-    headers = {"Authorization": f"Bearer {a_token}"}
+    headers = auth_headers(a_token)
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:

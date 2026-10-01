@@ -3,7 +3,7 @@ import requests
 import os
 import pandas as pd
 # Package imports
-from .utils import logger, ensure_token
+from .utils import logger, ensure_token, auth_headers
 
 # -------------------- #
 # Get Teams -----
@@ -26,7 +26,7 @@ def GetTeams() -> pd.DataFrame:
     url = f"{os.getenv('CLOUD_URL')}/teams"
 
     logger.debug("GET Request: Teams.")
-    headers = {"Authorization": f"Bearer {a_token}"}
+    headers = auth_headers(a_token)
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:

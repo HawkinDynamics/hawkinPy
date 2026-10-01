@@ -6,10 +6,45 @@ import requests
 import datetime
 import os
 from dotenv import load_dotenv, set_key
+from importlib.metadata import PackageNotFoundError, version as _pkg_version
 from .LoggerConfig import LoggerConfig
 
 # Get a logger specific to this module
 logger = LoggerConfig.get_logger(__name__)
+
+
+# -------------------- #
+# API client identity
+# Every client authenticates with an org-scoped token, so the API can already
+# attribute a call to an organization -- but not to an integration, because
+# each one sends only an Authorization header. This label says which software
+# made the call, and carries nothing about the user.
+
+
+def client_id() -> str:
+    """Return this client's identifier.
+
+    ``hdforce/2.1.0`` from a released install, where
+    poetry-dynamic-versioning has stamped the tag version onto the package
+    metadata. A dev install reports the ``0.0.0`` placeholder from
+    pyproject.toml, and a source tree that was never installed reports
+    ``hdforce/unknown``.
+    """
+    try:
+        pkg_version = _pkg_version("hdforce")
+    except PackageNotFoundError:
+        # Running from a source tree that was never installed.
+        pkg_version = "unknown"
+    return f"hdforce/{pkg_version}"
+
+
+def auth_headers(token: str) -> dict:
+    """Return the standard request headers for an API call."""
+    return {
+        "Authorization": f"Bearer {token}",
+        "X-Hawkin-Client": client_id(),
+    }
+
 
 # -------------------- #
 # EPOCH Converter
@@ -250,7 +285,7 @@ class TokenManager:
         self.url_cloud = f"{base_url}/{self.orgName}"  # Append orgName to URL
 
         # Set auth headers
-        headers = {"Authorization": f"Bearer {self.refreshToken}"}
+        headers = auth_headers(self.refreshToken)
         # Send Token Request
         response = requests.get(url_token, headers=headers)
 
@@ -382,6 +417,11 @@ def responseHandler(json_data):
     # 7 - change "." to "_" in column names
     df.columns = [col.replace('.', '_') for col in df.columns]
 
+    # 7.1 - nestMetrics=true (API v1.16): expand the per-test `metrics` array
+    # into a long table, one row per test x metric.
+    if 'metrics' in df.columns:
+        df = _expand_nested_metrics(df)
+
     # 8 - List all columns from the DataFrame
     columns = df.columns.tolist()
 
@@ -419,6 +459,39 @@ def responseHandler(json_data):
         df[col] = df[col].astype(str)
 
     return df
+
+def _expand_nested_metrics(df):
+    """Turn a `metrics` list column (nestMetrics=true, API v1.16) into a long table.
+
+    Each element of `metrics` is a list of
+    ``{metricId, metricLabel, metricUnits, metricValue}`` dicts. The result has
+    one row per test x metric with snake_case ``metric_*`` columns. A test whose
+    list is empty keeps a single row with NaN metric fields so it stays visible.
+    """
+    rename = {
+        'metricId': 'metric_id',
+        'metricLabel': 'metric_label',
+        'metricUnits': 'metric_units',
+        'metricValue': 'metric_value',
+    }
+    padded = df['metrics'].apply(
+        lambda m: m if isinstance(m, list) and len(m) > 0 else [{}]
+    )
+    # reset_index so the join below is positional; explode leaves duplicate
+    # index labels, and joining on those would cross-multiply the rows.
+    long_df = (
+        df.drop(columns='metrics')
+        .assign(metrics=padded)
+        .explode('metrics')
+        .reset_index(drop=True)
+    )
+    expanded = (
+        pd.json_normalize(long_df['metrics'].tolist())
+        .reindex(columns=list(rename))
+        .rename(columns=rename)
+    )
+    return long_df.drop(columns='metrics').join(expanded)
+
 
 # -------------------- #
 # Token Refresh Helper

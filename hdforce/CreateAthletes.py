@@ -3,7 +3,7 @@ import requests
 import os
 from typing import List
 # Package imports
-from .utils import logger, ensure_token
+from .utils import logger, ensure_token, auth_headers
 from .Classes import NewAthlete, AthleteResult
 
 # -------------------- #
@@ -35,7 +35,7 @@ def CreateAthletes(athletes: List[NewAthlete]) -> List[AthleteResult]:
     payload = [athlete.model_dump() for athlete in athletes]
 
     logger.debug(f"Payload: {len(payload)} athletes")
-    headers = {"Authorization": f"Bearer {a_token}"}
+    headers = auth_headers(a_token)
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code != 200:

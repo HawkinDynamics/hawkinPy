@@ -1,5 +1,14 @@
 # Changelogs
 
+## hdforce v2.1.0
+
+### New Features
+* `GetTests()` gains three optional keyword arguments that map to the Hawkin API v1.16 response-shape query params: `useNulls` (default `True`), `rounding` (default `False`) and `nestMetrics` (default `False`). Only a non-default value is sent, so existing calls produce identical requests. They exist so customers migrating from a legacy named API endpoint to `/api/v1` can reproduce that endpoint's payload; new integrations should leave the defaults.
+  * `useNulls=False` keeps the string `"N/A"` for non-calculable metrics instead of `NaN` (affected metric columns become object dtype).
+  * `rounding=True` returns each metric rounded to its standard display precision. Inert when `nestMetrics=True`.
+  * `nestMetrics=True` returns a long DataFrame — one row per test × metric with `metric_id`, `metric_label`, `metric_units` and `metric_value` columns beside the trial, athlete and test-type columns. A test with no numeric metrics keeps a single row with `NaN` metric fields.
+* Network-free unit tests (`tests/test_response_shapes.py`) cover query-param emission and both response shapes.
+
 ## hdforce v2.0.0
 
 ### Breaking Changes

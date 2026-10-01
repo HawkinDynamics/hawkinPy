@@ -3,7 +3,7 @@ import requests
 import os
 import pandas as pd
 # Package imports
-from .utils import responseHandler, logger, dtConverter, ensure_token
+from .utils import responseHandler, logger, dtConverter, ensure_token, auth_headers
 
 # -------------------- #
 # Get All Tests
@@ -18,7 +18,10 @@ def GetTests(
     teamId=None,
     groupId=None,
     includeInactive=False,
-    includeEid=False
+    includeEid=False,
+    useNulls=True,
+    rounding=False,
+    nestMetrics=False
 ) -> pd.DataFrame:
     """Get test trials using cursor-based pagination (API v1.13+).
 
@@ -61,6 +64,24 @@ def GetTests(
         Default False. When True, the API includes an `eid` (equipment ID)
         column on each test record identifying the hardware that produced
         the trial.
+    useNulls : bool, optional
+        Default True: non-calculable metrics come back as NaN. Set False to
+        receive the string "N/A" instead (API v1.16). Any metric column
+        containing "N/A" becomes object dtype. Intended for customers
+        migrating from a legacy named endpoint; leave the default otherwise.
+    rounding : bool, optional
+        Default False: raw metric values. Set True to have the API round
+        each metric to its standard display precision (API v1.16). Has no
+        effect when nestMetrics=True. Intended for customers migrating from
+        a legacy named endpoint; leave the default otherwise.
+    nestMetrics : bool, optional
+        Default False: one row per test with a column per metric. Set True
+        to receive a long table instead — one row per test x metric with
+        `metric_id`, `metric_label`, `metric_units`, `metric_value` columns
+        beside the trial / athlete / test-type columns (API v1.16). Only
+        metrics with a numeric value are included; a test with none keeps a
+        single row with NaN metric fields. Intended for customers migrating
+        from a legacy named endpoint; leave the default otherwise.
 
     Returns
     -------
@@ -202,11 +223,20 @@ def GetTests(
     if includeEid:
         query['includeEid'] = 'true'
 
+    # Response-shape overrides (API v1.16). Only the non-default value is
+    # sent so existing callers produce byte-identical requests.
+    if not useNulls:
+        query['useNulls'] = 'false'
+    if rounding:
+        query['rounding'] = 'true'
+    if nestMetrics:
+        query['nestMetrics'] = 'true'
+
     # Enable pagination
     query['paginate'] = 'true'
 
     # Pagination loop
-    headers = {"Authorization": f"Bearer {a_token}"}
+    headers = auth_headers(a_token)
     all_pages = []
     last_sync_time = None
     last_test_time = None
@@ -219,7 +249,7 @@ def GetTests(
     while True:
         # Refresh token if needed between pages
         a_token = ensure_token()
-        headers = {"Authorization": f"Bearer {a_token}"}
+        headers = auth_headers(a_token)
 
         # Add cursor for subsequent pages
         current_query = dict(query)
