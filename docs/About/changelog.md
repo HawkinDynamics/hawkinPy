@@ -1,5 +1,24 @@
 # Changelogs
 
+## hdforce v2.2.0
+
+### New Features
+* `NewAthlete` gains optional `position`, `sport`, `dob` and `height`, and `CreateAthletes()` / `UpdateAthletes()` now send all four as native athlete fields (never inside `external`).
+  * `dob` accepts a `datetime.date`, a 4-digit year (int or str) or `"YYYY-MM-DD"`, and is sent as `"YYYY-MM-DD"` or `"YYYY"`. An invalid format or impossible date raises a `ValidationError`.
+  * `height` is in centimeters and rounded to 1 decimal place. Sending a height below 100 emits a `UserWarning`, because the API reads those values back as legacy feet/inches (95 reads back as 241.3).
+  * Fields left as `None` (or blank) are not sent: on create they stay unset, on update they stay unchanged. The API can't clear these fields; clear them in the Hawkin app.
+* Network-free unit tests (`tests/test_athlete_profile_fields.py`) cover the create/update payloads.
+
+### Behaviour Changes
+* `CreateAthletes()` and `UpdateAthletes()` no longer send fields whose value is `None`. Previously `Athlete.image=None` was sent as `null` on every update; it is now omitted, so the athlete's photo is left unchanged.
+* `lastTestedOn` is read-only and is never sent.
+* `external` handling is unchanged when you send it: it is sent as given and replaced, not merged, on update.
+
+### Bug Fixes
+* **`import hdforce` failed on a fresh install of 2.1.0** with `ModuleNotFoundError: No module named 'pandas.core.col'`. hdforce 2.1.0 allowed `pyjanitor` up to 0.32, and pyjanitor 0.32.x imports a pandas 3 module without declaring pandas 3 as a requirement, so pip paired it with the pandas 2 that hdforce requires. `pyjanitor` is now pinned to 0.30.x. If you are on 2.1.0, upgrade to 2.2.0, or run `pip install "pyjanitor<0.31"`.
+* `UpdateAthletes()` now attributes each result by athlete `id` instead of by name. Two athletes in one batch can share a name, and keying on name collapsed their results: a failed update could be reported as successful, and a failure reason could land on the wrong athlete. A response entry that arrives without an `id` still falls back to the name.
+* `UpdateAthletes()` now sends only the fields you set on each `Athlete`; every other field is left unchanged. Previously the `Athlete` defaults (`active=True`, `teams=[]`, `groups=[]`, `external={}`) were always sent, so a rename-only update such as `Athlete(id=..., name="New Name")` removed the athlete from all teams and groups, deleted all custom properties and re-activated an inactive athlete. A field you set explicitly is still sent even when it equals the default (e.g. `teams=[]` or `active=True`). `CreateAthletes()` is unchanged and still sends the `NewAthlete` defaults.
+
 ## hdforce v2.1.0
 
 ### New Features

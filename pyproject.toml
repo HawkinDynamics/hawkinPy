@@ -41,7 +41,7 @@ python-dotenv = "^1.0.1"
 requests = "^2.33.0"
 pydantic = "^2.0.0" 
 pyarrow = ">=18.1,<26.0"
-pyjanitor = ">=0.30,<0.33"
+pyjanitor = "^0.30"  # <0.31: pyjanitor 0.32.x imports pandas 3 (pandas.core.col) without declaring it; see CSE-162
 keyring = "^25.0.0"
 
 [tool.poetry.group.dev.dependencies]

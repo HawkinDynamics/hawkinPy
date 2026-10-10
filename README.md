@@ -82,6 +82,25 @@ Every organization has data specific to them. With that, these entities will hav
 * `GetGroups()` - Get the group names and IDs for all the groups in the org. The response will be a data frame containing the groups that are in the organization.
 * `GetTags()` - Get the tag names, IDs, and descriptions for tags created by users in your org. The response will be a data frame.
 
+### Athlete Management
+* `CreateAthletes()` - Create up to 500 athletes at once from a list of `NewAthlete` objects (`from hdforce.Classes import NewAthlete`). Returns a list of `AthleteResult` objects.
+* `UpdateAthletes()` - Update up to 500 athletes at once from a list of `Athlete` objects (`from hdforce.Classes import Athlete`). Only the fields you set are sent; anything you don't set is left unchanged. `external`, when you send it, is replaced, not merged, so send every custom property you want to keep.
+
+Both accept the profile fields `position`, `sport`, `dob` and `height`, which are sent as native athlete fields (never inside `external`):
+
+* `dob` accepts a `datetime.date`, a 4-digit year or `"YYYY-MM-DD"`.
+* `height` is in **centimeters**, rounded to 1 decimal place. The API rejects values outside 0 to 300 (hdforce doesn't check the range); 0 counts as not provided and isn't sent. The API reads heights below 100 back as legacy feet/inches (95 reads back as 241.3), so a `UserWarning` is raised when you send one.
+* Fields left as `None` are not sent. On update that means they stay unchanged: the API can't clear these fields, so clear them in the Hawkin app.
+* `lastTestedOn` is read-only and never sent.
+
+``` Python
+from hdforce import CreateAthletes
+from hdforce.Classes import NewAthlete
+
+CreateAthletes([NewAthlete(name="Jane Doe", position="Forward", sport="Basketball",
+                           dob="1995-03-15", height=180)])
+```
+
 ### Get Test Data
 This is what you are here for. These functions allow you to call test data most efficiently. It is encouraged that you take advantage of the `from_`, `to_`, and `sync` parameters. This will help prevent from having calls with large payloads that may timeout and fail.
 
